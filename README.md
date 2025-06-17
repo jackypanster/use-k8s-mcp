@@ -48,11 +48,26 @@ A Python project demonstrating the integration of MCP (Model Context Protocol) w
 
 ## 🔧 Configuration
 
-The project is configured to use OpenRouter API with the following settings:
+The project is configured for **Kubernetes cluster management** with maximum precision and reliability:
 
-- **Model**: `openai/gpt-3.5-turbo` (supports tool use)
+- **Model**: `anthropic/claude-3-5-sonnet` (Excellent for infrastructure tasks)
 - **Base URL**: `https://openrouter.ai/api/v1`
+- **Max Context**: 200,000 tokens (200K) - Handle large K8s manifests
+- **Max Tokens**: 4,096 (Sufficient for detailed configurations)
+- **Temperature**: 0.0 (**CRITICAL**: Eliminates randomness for consistent commands)
+- **Top P**: 0.1 (**STRICT**: Uses only most probable tokens)
+- **Max Retries**: 5 (Enhanced reliability for critical operations)
+- **Request Timeout**: 120s (Allows time for complex cluster analysis)
+- **Stream**: Disabled (Complete, validated responses)
 - **MCP Server**: Fetch service for web search capabilities
+
+### 🛡️ Production Safety Features
+
+- **Deterministic Outputs**: Zero randomness ensures consistent K8s commands
+- **Safety Stop Sequences**: Prevents dangerous command execution
+- **Command Validation**: Built-in validation for Kubernetes operations
+- **Enhanced Reliability**: 5 retries with extended timeouts
+- **Large Context**: 200K tokens for analyzing complex cluster configurations
 
 ## 🏃‍♂️ Usage
 
@@ -98,12 +113,27 @@ use-k8s-mcp/
 3. **Model Not Found**: Some models may not support tool use - stick with `openai/gpt-3.5-turbo`
 4. **Connection Timeout**: Network issues with external services are normal and will be handled gracefully
 
-### Supported Models
+### Kubernetes-Optimized Models
 
-Models that work well with tool use:
-- `openai/gpt-3.5-turbo`
-- `openai/gpt-4`
-- `anthropic/claude-3-5-sonnet` (if available)
+Models specifically configured for infrastructure and cluster management:
+
+| Model                           | Context Length | K8s Strengths                                   | Precision | Cost   |
+| ------------------------------- | -------------- | ----------------------------------------------- | --------- | ------ |
+| `anthropic/claude-3-5-sonnet` ⭐ | 200K tokens    | YAML parsing, complex reasoning, error analysis | Highest   | Medium |
+| `openai/gpt-4-turbo`            | 128K tokens    | Precise instructions, troubleshooting           | High      | High   |
+| `qwen/qwen2.5-coder-32b`        | 128K tokens    | Code generation, debugging, cost-effective      | High      | Low    |
+| `openai/gpt-4o`                 | 128K tokens    | Latest features, multi-modal analysis           | High      | High   |
+
+**Current Configuration**: Using `anthropic/claude-3-5-sonnet` for maximum precision in Kubernetes operations.
+
+### 🎯 Configuration Profiles
+
+| Environment     | Model             | Temperature | Safety Level | Use Case                      |
+| --------------- | ----------------- | ----------- | ------------ | ----------------------------- |
+| **Production**  | Claude-3.5-Sonnet | 0.0         | Maximum      | Live cluster operations       |
+| **Staging**     | Claude-3.5-Sonnet | 0.0         | High         | Pre-production testing        |
+| **Development** | Qwen-Coder-32B    | 0.1         | Medium       | Development clusters          |
+| **Analysis**    | Claude-3.5-Sonnet | 0.0         | High         | Log analysis, troubleshooting |
 
 ## 📝 Example Output
 

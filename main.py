@@ -22,11 +22,22 @@ async def main():
     # Create MCPClient from config file
     client = MCPClient.from_dict(config)
 
-    # Create LLM with OpenRouter configuration
+    # Create LLM optimized for Kubernetes cluster management
+    # Configuration prioritizes precision, reliability, and deterministic outputs
     llm = ChatOpenAI(
-        model="qwen/qwen3-32b",  # Use GPT-3.5 which supports tool use
-        api_key=os.getenv("OPENROUTER_API_KEY"),  # Your OpenRouter API key
-        base_url="https://openrouter.ai/api/v1",  # OpenRouter base URL
+        model="openai/gpt-3.5-turbo",  # Reliable model with good tool support
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+        base_url="https://openrouter.ai/api/v1",
+        max_tokens=4096,  # Sufficient for detailed K8s configurations
+        temperature=0.0,  # CRITICAL: Eliminate randomness for consistent commands
+        top_p=0.1,  # STRICT: Use only most probable tokens
+        frequency_penalty=0.0,  # No creative variations for infrastructure
+        presence_penalty=0.0,  # Avoid unexpected token choices
+        max_retries=5,  # Enhanced reliability for critical operations
+        request_timeout=120,  # Allow time for complex cluster analysis
+        streaming=False,  # Disable streaming for complete, validated responses
+        # Additional safety parameters for production environments
+        stop=["```bash", "```sh", "rm -rf", "kubectl delete"],  # Prevent unsafe commands
     )
 
     # Create agent with the client
