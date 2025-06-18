@@ -1,154 +1,201 @@
-# use-k8s-mcp
+# K8s MCP Agent - Kubernetes集群管理系统
 
-Kubernetes MCP Agent with Gemini 2.5 Flash
+基于Gemini 2.5 Flash和MCP (Model Context Protocol) 的智能Kubernetes集群管理系统。
 
-## 📁 项目结构
+## 🚀 核心功能
+
+### 1. 智能集群交互 (主应用)
+- **文件**: `src/main.py`
+- **功能**: 基于LLM Agent的智能K8s集群管理
+- **特点**: 自然语言交互，实时集群操作
+
+### 2. 集群扫描系统 (扫描应用)
+- **文件**: `src/k8s_scanner.py`
+- **功能**: 自动发现MCP工具并扫描集群资源
+- **特点**: 定期扫描，数据缓存，资源监控
+
+## 📋 系统架构
 
 ```
-use-k8s-mcp/
-├── src/                    # 源代码
-│   ├── llm_config.py      # 核心LLM配置模块 (Gemini 2.5 Flash)
-│   ├── main.py            # 主程序
-│   └── fail_fast_exceptions.py # Fail-fast异常处理
-├── test/                   # 测试
-│   └── test_llm_config.py # LLM配置测试
-├── doc/                    # 文档
-│   ├── README.md          # 详细说明文档
-│   ├── MCP_TROUBLESHOOTING.md # MCP故障排除
-│   └── TROUBLESHOOTING.md # 故障排除
-├── script/                 # 部署脚本
-│   └── deploy-vllm.sh     # VLLM部署脚本
-├── .env                    # 环境配置
-├── main.py                 # 主程序入口点
-└── pyproject.toml         # 项目配置
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   用户交互      │    │   集群扫描      │    │   共享层        │
+│   (main.py)     │    │ (k8s_scanner.py)│    │                 │
+├─────────────────┤    ├─────────────────┤    ├─────────────────┤
+│ • LLM Agent     │    │ • 工具发现      │    │ • MCP工具       │
+│ • 自然语言交互  │    │ • 资源扫描      │    │ • SQLite缓存    │
+│ • 实时操作      │    │ • 数据缓存      │    │ • 配置管理      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │ K8s MCP Server  │
+                    │ (真实K8s集群)   │
+                    └─────────────────┘
 ```
 
-## 🚀 快速开始
+## 🛠️ 快速开始
 
-### 1. 安装依赖
+### 1. 环境配置
+
+创建 `.env` 文件：
+
+```bash
+# LLM配置 (Gemini 2.5 Flash)
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL_NAME=google/gemini-2.5-flash
+LLM_MAX_INPUT_CONTEXT=1048576
+LLM_MAX_OUTPUT_TOKENS=32768
+LLM_TEMPERATURE=0.0
+
+# MCP服务器配置
+MCP_SERVER_URL=http://your-k8s-mcp-server:port/sse
+MCP_SERVER_TYPE=sse
+MCP_SERVER_NAME=k8s
+```
+
+### 2. 安装依赖
+
 ```bash
 uv sync
 ```
 
-### 2. 配置环境
-创建 `.env` 文件，配置所有必需的环境变量：
+### 3. 使用方法
 
+#### 智能集群交互
 ```bash
-# ====== LLM 提供商配置 ======
-# OpenRouter API 密钥 - 用于访问 Gemini 2.5 Flash 模型
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# OpenRouter API 基础 URL
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-
-# LLM 提供商名称
-LLM_PROVIDER_NAME=OpenRouter
-
-# ====== 模型配置 ======
-# Gemini 2.5 Flash 模型名称
-LLM_MODEL_NAME=google/gemini-2.5-flash
-
-# 最大输入上下文长度 (tokens)
-LLM_MAX_INPUT_CONTEXT=1048576
-
-# 最大输出 tokens 数量
-LLM_MAX_OUTPUT_TOKENS=32768
-
-# 请求超时时间 (秒)
-LLM_REQUEST_TIMEOUT=600
-
-# ====== 模型行为配置 ======
-# 温度设置 (0.0-1.0)
-LLM_TEMPERATURE=0.0
-
-# Top-p 采样参数 (0.0-1.0)
-LLM_TOP_P=0.05
-
-# 最大重试次数
-LLM_MAX_RETRIES=5
-
-# 随机种子
-LLM_SEED=42
-
-# ====== MCP 服务器配置 ======
-# K8s MCP 服务器 URL
-MCP_SERVER_URL=http://your-k8s-mcp-server:port/sse
-
-# MCP 服务器类型
-MCP_SERVER_TYPE=sse
-
-# MCP 服务器名称
-MCP_SERVER_NAME=k8s
-
-# ====== 安全配置 ======
-# 安全停止序列 (用逗号分隔)
-LLM_SAFETY_STOP_SEQUENCES=```bash,```sh,```shell,rm -rf,kubectl delete,docker rmi,sudo rm
-
-# ====== 应用配置 ======
-# 应用环境
-APP_ENVIRONMENT=production
-
-# 日志级别
-LOG_LEVEL=INFO
-
-# 是否启用详细日志
-VERBOSE_LOGGING=false
+# 启动智能Agent
+uv run python src/main.py
 ```
 
-> 💡 **配置说明**: 项目遵循十二要素应用方法论，所有配置通过环境变量管理，支持不同部署环境的灵活配置。
-
-### 3. 运行程序
+#### 集群扫描系统
 ```bash
-# 运行主程序
-uv run python main.py
+# 发现MCP工具
+uv run python src/k8s_scanner.py discover
+
+# 扫描指定集群
+uv run python src/k8s_scanner.py scan --cluster production-cluster
+
+# 完整扫描流程 (工具发现 + 集群扫描)
+uv run python src/k8s_scanner.py full-scan --cluster production-cluster
+
+# 列出缓存的资源
+uv run python src/k8s_scanner.py list
 ```
 
-> 💡 **提示**: 如果遇到MCP连接错误，请查看 [MCP故障排除指南](doc/MCP_TROUBLESHOOTING.md)
+## 📊 数据管理
 
-### 4. 运行测试
-```bash
-# 运行配置测试
-uv run python test/test_llm_config.py
+### 缓存数据库
+- **位置**: `data/k8s_cache.db`
+- **类型**: SQLite
+- **内容**: 集群信息、命名空间、节点、Pod、服务、MCP工具
+
+## 🔧 工具和脚本
+
+### 保留的实用工具
+- `script/check-scan-env.py` - 环境配置检查
+- `script/list-available-tools.py` - 列出可用MCP工具
+- `script/query-cache-db.py` - 查询缓存数据库
+- `script/verify-scan-status.py` - 验证扫描状态
+
+### 文档
+- `script/cluster-scanning-user-guide.md` - 扫描系统用户指南
+- `script/cluster-state-caching-system.md` - 缓存系统技术文档
+- `script/system-architecture-working-principles.md` - 系统架构原理
+
+## 🏗️ 系统组件
+
+### 核心模块
+```
+src/
+├── main.py                 # 智能Agent主应用
+├── k8s_scanner.py         # 集群扫描器主应用
+├── llm_config.py          # LLM配置管理
+├── cache/                 # 缓存系统
+│   ├── cache_manager.py   # 缓存管理器
+│   ├── models.py          # 数据模型
+│   └── database.py        # 数据库操作
+├── scanner/               # 扫描系统
+│   ├── tool_discovery.py  # 工具发现
+│   ├── cluster_scan_app.py # 集群扫描应用
+│   ├── cluster_scanner.py  # 集群扫描器
+│   ├── resource_parser.py  # 资源解析器
+│   └── scan_coordinator.py # 扫描协调器
+└── mcp_tools/             # MCP工具管理
+    ├── tool_loader.py     # 工具加载器
+    └── models.py          # 工具模型
 ```
 
-## 📚 文档
+## 🔄 工作流程
 
-详细文档请查看 `doc/` 目录：
+### 1. 工具发现流程
+1. 通过LLM Agent调用MCP服务器
+2. 获取所有可用的K8s MCP工具
+3. 解析工具信息（名称、描述、参数等）
+4. 缓存工具信息到SQLite数据库
 
-- **[详细说明](doc/README.md)** - 完整的项目说明
-- **[MCP故障排除](doc/MCP_TROUBLESHOOTING.md)** - MCP连接问题解决
-- **[故障排除](doc/TROUBLESHOOTING.md)** - 其他常见问题
+### 2. 集群扫描流程
+1. 加载缓存的MCP工具信息
+2. 使用Agent调用相应工具扫描集群资源
+3. 解析扫描结果
+4. 缓存资源信息到SQLite数据库
+5. 应用TTL策略管理数据生命周期
 
-## 🔧 核心特性
+### 3. 智能交互流程
+1. 用户输入自然语言请求
+2. LLM Agent分析用户意图
+3. 选择合适的MCP工具或查询缓存
+4. 执行操作并返回结果
 
-- **🤖 专用模型**: 专门使用 Gemini 2.5 Flash，具备强大的推理能力
-- **🔧 工具调用**: 完美兼容 MCP 工具调用
-- **📏 大上下文**: 支持 1,048,576 tokens，适合复杂的 K8s 运维
-- **⚡ Fail Fast**: 严格的异常处理，确保数据真实性
-- **🛡️ 安全可靠**: 绝不编造集群数据，只使用真实的 MCP 工具返回
-- **⚙️ 环境配置**: 遵循十二要素应用方法论，所有配置通过环境变量管理
-- **🔒 安全第一**: API 密钥和敏感配置外部化，支持不同部署环境
+## 📈 监控和维护
 
-## 🔧 开发
-
-### 项目结构说明
-
-- **`src/`** - 所有源代码文件
-- **`test/`** - 测试文件
-- **`doc/`** - 项目文档
-- **`script/`** - 部署和运维脚本
-
-### 运行测试
-
+### 扫描状态监控
 ```bash
-# 运行配置测试
-uv run python test/test_llm_config.py
+# 检查扫描状态
+uv run python script/verify-scan-status.py
+
+# 查看缓存统计
+uv run python script/query-cache-db.py
 ```
 
-## 🤝 贡献
+### 环境检查
+```bash
+# 验证环境配置
+uv run python script/check-scan-env.py
+```
 
-欢迎提交 Issue 和 Pull Request！
+## 🚫 已清理的Demo程序
 
-## 📄 许可证
+为了保持代码库的整洁，已删除以下demo程序：
+- `script/fixed-scan-demo-v2.py`
+- `script/fixed-scan-demo.py`
+- `script/complete-scan-with-cache.py`
+- `script/debug-agent-response.py`
+- `script/run-scan-demo.sh`
+- `script/run-scanner-demo.py`
+- `script/simple-cache-test.py`
+- `script/simple-scan-test.py`
 
-MIT License
+## 📝 配置说明
+
+系统遵循十二要素应用方法论，所有配置通过环境变量管理：
+
+- **LLM配置**: OpenRouter API密钥、模型参数
+- **MCP配置**: 服务器地址、连接类型
+- **缓存配置**: 数据库路径、TTL设置
+- **扫描配置**: 扫描间隔、超时设置
+
+## 🔒 安全注意事项
+
+- 生产部署前请移除代码中的私有域名信息
+- 确保API密钥安全存储
+- 定期更新依赖包
+- 监控MCP服务器连接状态
+
+## 📞 支持
+
+如有问题，请查看：
+1. 系统架构文档: `script/system-architecture-working-principles.md`
+2. 用户指南: `script/cluster-scanning-user-guide.md`
+3. 技术文档: `script/cluster-state-caching-system.md`

@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Tuple, Optional
 
 from .models import ToolSchema
 from .exceptions import SchemaParseError
-from ..fail_fast_exceptions import create_exception_context
+from src.fail_fast_exceptions import create_exception_context
 
 
 class SchemaParser:

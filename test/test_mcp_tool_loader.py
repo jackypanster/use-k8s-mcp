@@ -23,7 +23,7 @@ os.environ.update({
     'MCP_TOOL_LOAD_TIMEOUT': '30'
 })
 
-from src.mcp import (
+from src.mcp_tools import (
     MCPToolLoader, SchemaParser, CapabilityAnalyzer, ToolSelector,
     ToolSchema, ToolCapabilities, MCPConnectionError, ToolLoadError
 )

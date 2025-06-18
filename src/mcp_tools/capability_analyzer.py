@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Set
 
 from .models import ToolCapabilities, ToolSchema, K8S_RESOURCE_TYPES, K8S_OPERATION_TYPES
 from .exceptions import CapabilityAnalysisError
-from ..fail_fast_exceptions import create_exception_context
+from src.fail_fast_exceptions import create_exception_context
 
 
 class CapabilityAnalyzer:

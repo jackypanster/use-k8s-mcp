@@ -3,7 +3,7 @@ MCP工具预加载系统异常定义
 遵循fail-fast原则和详细异常上下文
 """
 
-from ..fail_fast_exceptions import K8sAgentException
+from src.fail_fast_exceptions import K8sAgentException
 
 
 class MCPConnectionError(K8sAgentException):

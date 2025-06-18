@@ -12,8 +12,8 @@ from .models import (
     ToolCapabilities, ToolSelectionCriteria, ToolRanking,
     K8S_RESOURCE_TYPES, K8S_OPERATION_TYPES
 )
-from ..cache import CacheManager
-from ..fail_fast_exceptions import create_exception_context, K8sAgentException
+from src.cache import CacheManager
+from src.fail_fast_exceptions import create_exception_context, K8sAgentException
 
 
 class ToolSelectionError(K8sAgentException):
