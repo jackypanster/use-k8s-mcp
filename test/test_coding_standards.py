@@ -20,7 +20,10 @@ class CodingStandardsTest(unittest.TestCase):
     
     def setUp(self) -> None:
         """测试前准备"""
-        self.src_dir = project_root / "src" / "cache"
+        self.src_dirs = [
+            project_root / "src" / "cache",
+            project_root / "src" / "mcp"
+        ]
         self.max_file_lines = 400  # 适当放宽，允许包含完整的数据模型
         self.max_function_lines = 55  # 适当放宽，允许SQL schema定义
         self.max_function_params = 5  # 适当放宽，允许更多配置参数
@@ -29,40 +32,42 @@ class CodingStandardsTest(unittest.TestCase):
     def test_file_size_limits(self) -> None:
         """测试文件大小限制"""
         violations = []
-        
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue  # 跳过__init__.py文件
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                line_count = len([line for line in lines if line.strip()])  # 排除空行
-                
-                if line_count > self.max_file_lines:
-                    violations.append(f"{py_file.name}: {line_count}行 (限制: {self.max_file_lines}行)")
-        
-        self.assertEqual(len(violations), 0, 
+
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue  # 跳过__init__.py文件
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    line_count = len([line for line in lines if line.strip()])  # 排除空行
+
+                    if line_count > self.max_file_lines:
+                        violations.append(f"{src_dir.name}/{py_file.name}: {line_count}行 (限制: {self.max_file_lines}行)")
+
+        self.assertEqual(len(violations), 0,
                         f"以下文件超过行数限制:\n" + "\n".join(violations))
         print(f"✅ 文件大小检查通过 - 所有文件都在{self.max_file_lines}行以内")
     
     def test_function_complexity(self) -> None:
         """测试函数复杂度"""
         violations = []
-        
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                file_violations = self._check_function_complexity(tree, py_file.name)
-                violations.extend(file_violations)
-            except SyntaxError as e:
-                self.fail(f"语法错误在文件 {py_file.name}: {e}")
-        
+
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    file_violations = self._check_function_complexity(tree, f"{src_dir.name}/{py_file.name}")
+                    violations.extend(file_violations)
+                except SyntaxError as e:
+                    self.fail(f"语法错误在文件 {src_dir.name}/{py_file.name}: {e}")
+
         self.assertEqual(len(violations), 0,
                         f"以下函数违反复杂度规范:\n" + "\n".join(violations))
         print(f"✅ 函数复杂度检查通过 - 所有函数都在{self.max_function_lines}行、{self.max_function_params}个参数以内")
@@ -71,19 +76,20 @@ class CodingStandardsTest(unittest.TestCase):
         """测试类方法数量"""
         violations = []
         
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                file_violations = self._check_class_method_count(tree, py_file.name)
-                violations.extend(file_violations)
-            except SyntaxError as e:
-                self.fail(f"语法错误在文件 {py_file.name}: {e}")
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    file_violations = self._check_class_method_count(tree, f"{src_dir.name}/{py_file.name}")
+                    violations.extend(file_violations)
+                except SyntaxError as e:
+                    self.fail(f"语法错误在文件 {src_dir.name}/{py_file.name}: {e}")
         
         self.assertEqual(len(violations), 0,
                         f"以下类违反方法数量规范:\n" + "\n".join(violations))
@@ -93,19 +99,20 @@ class CodingStandardsTest(unittest.TestCase):
         """测试类型注解"""
         violations = []
         
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                file_violations = self._check_type_annotations(tree, py_file.name)
-                violations.extend(file_violations)
-            except SyntaxError as e:
-                self.fail(f"语法错误在文件 {py_file.name}: {e}")
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    file_violations = self._check_type_annotations(tree, f"{src_dir.name}/{py_file.name}")
+                    violations.extend(file_violations)
+                except SyntaxError as e:
+                    self.fail(f"语法错误在文件 {src_dir.name}/{py_file.name}: {e}")
         
         # 允许少量违反，因为某些特殊情况可能不需要类型注解
         violation_rate = len(violations) / max(1, self._count_total_functions())
@@ -117,19 +124,20 @@ class CodingStandardsTest(unittest.TestCase):
         """测试文档字符串覆盖率"""
         violations = []
         
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                file_violations = self._check_docstring_coverage(tree, py_file.name)
-                violations.extend(file_violations)
-            except SyntaxError as e:
-                self.fail(f"语法错误在文件 {py_file.name}: {e}")
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    file_violations = self._check_docstring_coverage(tree, f"{src_dir.name}/{py_file.name}")
+                    violations.extend(file_violations)
+                except SyntaxError as e:
+                    self.fail(f"语法错误在文件 {src_dir.name}/{py_file.name}: {e}")
         
         # 要求公共函数和类都有docstring
         violation_rate = len(violations) / max(1, self._count_public_functions_and_classes())
@@ -224,44 +232,46 @@ class CodingStandardsTest(unittest.TestCase):
     def _count_total_functions(self) -> int:
         """统计总函数数量"""
         count = 0
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        count += 1
-            except SyntaxError:
-                pass
-        
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            count += 1
+                except SyntaxError:
+                    pass
+
         return count
     
     def _count_public_functions_and_classes(self) -> int:
         """统计公共函数和类的数量"""
         count = 0
-        for py_file in self.src_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-            
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            try:
-                tree = ast.parse(content)
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.ClassDef):
-                        count += 1
-                    elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        if not node.name.startswith('_'):
+        for src_dir in self.src_dirs:
+            for py_file in src_dir.glob("*.py"):
+                if py_file.name == "__init__.py":
+                    continue
+
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                try:
+                    tree = ast.parse(content)
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.ClassDef):
                             count += 1
-            except SyntaxError:
-                pass
-        
+                        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if not node.name.startswith('_'):
+                                count += 1
+                except SyntaxError:
+                    pass
+
         return count
 
 
