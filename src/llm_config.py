@@ -1,9 +1,3 @@
-"""
-K8s MCP Agent LLM配置模块
-专用于 Gemini 2.5 Flash 模型的环境配置管理
-遵循十二要素应用方法论，所有配置通过环境变量管理
-"""
-
 import os
 from typing import Dict, Any
 from dotenv import load_dotenv
@@ -134,32 +128,6 @@ gemini_config = GeminiMaxConfig()
 
 
 def create_llm(**kwargs) -> ChatOpenAI:
-    """
-    🎯 主要入口点：创建Gemini 2.5 Flash LLM实例
-
-    从环境变量读取所有配置，遵循十二要素应用方法论。
-    支持不同部署环境的灵活配置。
-
-    配置来源：
-    - 模型名称：LLM_MODEL_NAME
-    - 输入上下文：LLM_MAX_INPUT_CONTEXT
-    - 输出能力：LLM_MAX_OUTPUT_TOKENS
-    - 超时时间：LLM_REQUEST_TIMEOUT
-    - 温度设置：LLM_TEMPERATURE
-
-    Args:
-        **kwargs: 可选的覆盖参数
-
-    Returns:
-        配置的Gemini 2.5 Flash ChatOpenAI实例
-
-    Raises:
-        ValueError: 当必需的环境变量未设置时
-
-    Examples:
-        >>> llm = create_llm()  # 从环境变量读取配置
-        >>> llm = create_llm(max_tokens=16384)  # 覆盖输出限制
-    """
     return gemini_config.create_llm(**kwargs)
 
 
