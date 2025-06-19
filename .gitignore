@@ -249,3 +249,33 @@ htmlcov/
 # Documentation builds
 docs/_build/
 site/
+
+# Added by Task Master AI
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Cursor IDE - Contains sensitive API keys and configuration
+.cursor/
+
+# TaskMaster AI - Contains task data and potentially sensitive info
+.taskmaster/
+
+# Additional IDE and tools
+.roo/
+.roomodes
+.windsurfrules
