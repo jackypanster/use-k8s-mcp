@@ -81,7 +81,7 @@ class GeminiMaxConfig:
             配置的Gemini 2.5 Flash ChatOpenAI实例
         """
         # 创建原始LLM
-        original_llm = ChatOpenAI(
+        llm = ChatOpenAI(
             model=kwargs.get("model", self.MODEL_NAME),
             api_key=os.getenv("OPENROUTER_API_KEY"),
             base_url=kwargs.get("base_url", self.BASE_URL),
@@ -106,7 +106,7 @@ class GeminiMaxConfig:
         )
         
         # 包装为追踪版本
-        return TrackedChatOpenAI(original_llm)
+        return llm
     
     def get_model_info(self) -> Dict[str, Any]:
         """获取模型信息 (从环境变量配置)"""
@@ -124,7 +124,7 @@ class GeminiMaxConfig:
             "temperature": self.TEMPERATURE,
             "top_p": self.TOP_P,
             "max_retries": self.MAX_RETRIES,
-            "features": ["工具调用", "大上下文", "推理模式", "数学/编程", "K8s运维"],
+            "features": ["工具调用", "大上下文", "推理模式", "K8s运维"],
             "configuration": "环境变量配置 - 遵循十二要素应用方法论"
         }
 
@@ -163,19 +163,9 @@ def create_llm(**kwargs) -> ChatOpenAI:
     return gemini_config.create_llm(**kwargs)
 
 
-def get_model_info() -> Dict[str, Any]:
-    """
-    获取当前模型配置信息
-
-    Returns:
-        包含模型详细信息的字典，所有值来自环境变量配置
-    """
-    return gemini_config.get_model_info()
-
-
 def print_model_status():
     """打印当前模型状态"""
-    info = get_model_info()
+    info = gemini_config.get_model_info()
     print(f"🤖 当前LLM模型: {info['model']}")
     print(f"🔗 服务地址: {info['base_url']}")
     print(f"🔑 API密钥: {info['api_key']}")
@@ -184,107 +174,3 @@ def print_model_status():
     print(f"⏱️  超时设置: {info['timeout']}")
     print(f"🛠️  功能特性: {', '.join(info['features'])}")
     print(f"⚙️  配置模式: {info['configuration']}")
-
-
-# 在文件末尾添加LLM调用包装器
-class TrackedChatOpenAI:
-    """带追踪功能的ChatOpenAI包装器"""
-    
-    def __init__(self, llm):
-        self.llm = llm
-        
-    def __getattr__(self, name):
-        """代理所有属性到原始LLM"""
-        return getattr(self.llm, name)
-        
-    async def ainvoke(self, input, **kwargs):
-        """异步调用时增加日志追踪"""
-        from .output_utils import chain_start, chain_end, llm_request, llm_response, data_flow
-        
-        # 提取prompt文本
-        if hasattr(input, 'content'):
-            prompt_text = input.content
-        elif isinstance(input, str):
-            prompt_text = input
-        elif hasattr(input, 'messages') and input.messages:
-            prompt_text = str(input.messages[-1].content) if input.messages else "未知消息格式"
-        else:
-            prompt_text = str(input)
-            
-        llm_call_id = chain_start("LLM", "生成响应", 
-                                f"模型: {self.llm.model_name}, prompt长度: {len(prompt_text)} chars")
-        
-        # 记录LLM请求
-        llm_request(self.llm.model_name, prompt_text, getattr(self.llm, 'max_tokens', None))
-        
-        # 数据流：Agent → LLM
-        data_flow("AGENT", "LLM", "Prompt文本", len(prompt_text))
-        
-        try:
-            # 调用原始LLM
-            result = await self.llm.ainvoke(input, **kwargs)
-            
-            # 提取响应文本
-            response_text = result.content if hasattr(result, 'content') else str(result)
-            
-            # 记录LLM响应
-            llm_response(self.llm.model_name, response_text, 
-                        getattr(result, 'usage', {}).get('total_tokens') if hasattr(result, 'usage') else None)
-            
-            # 数据流：LLM → Agent
-            data_flow("LLM", "AGENT", "响应文本", len(response_text))
-            
-            chain_end(llm_call_id, f"成功生成响应，长度: {len(response_text)} chars")
-            
-            return result
-            
-        except Exception as e:
-            chain_end(llm_call_id, "", f"LLM调用失败: {str(e)}")
-            raise
-    
-    def invoke(self, input, **kwargs):
-        """同步调用时增加日志追踪"""
-        from .output_utils import chain_start, chain_end, llm_request, llm_response, data_flow
-        
-        # 提取prompt文本
-        if hasattr(input, 'content'):
-            prompt_text = input.content
-        elif isinstance(input, str):
-            prompt_text = input
-        elif hasattr(input, 'messages') and input.messages:
-            prompt_text = str(input.messages[-1].content) if input.messages else "未知消息格式"
-        else:
-            prompt_text = str(input)
-            
-        llm_call_id = chain_start("LLM", "生成响应", 
-                                f"模型: {self.llm.model_name}, prompt长度: {len(prompt_text)} chars")
-        
-        # 记录LLM请求
-        llm_request(self.llm.model_name, prompt_text, getattr(self.llm, 'max_tokens', None))
-        
-        # 数据流：Agent → LLM
-        data_flow("AGENT", "LLM", "Prompt文本", len(prompt_text))
-        
-        try:
-            # 调用原始LLM
-            result = self.llm.invoke(input, **kwargs)
-            
-            # 提取响应文本
-            response_text = result.content if hasattr(result, 'content') else str(result)
-            
-            # 记录LLM响应
-            llm_response(self.llm.model_name, response_text,
-                        getattr(result, 'usage', {}).get('total_tokens') if hasattr(result, 'usage') else None)
-            
-            # 数据流：LLM → Agent
-            data_flow("LLM", "AGENT", "响应文本", len(response_text))
-            
-            chain_end(llm_call_id, f"成功生成响应，长度: {len(response_text)} chars")
-            
-            return result
-            
-        except Exception as e:
-            chain_end(llm_call_id, "", f"LLM调用失败: {str(e)}")
-            raise
-
-
