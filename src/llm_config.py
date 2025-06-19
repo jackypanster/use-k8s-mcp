@@ -94,6 +94,7 @@ class GeminiMaxConfig:
             frequency_penalty=kwargs.get("frequency_penalty", 0.0),
             presence_penalty=kwargs.get("presence_penalty", 0.0),
             streaming=kwargs.get("streaming", False),
+            seed=kwargs.get("seed", self.SEED),  # 明确指定seed参数，修复UserWarning
 
             # 可靠性配置 (从环境变量)
             max_retries=kwargs.get("max_retries", self.MAX_RETRIES),
@@ -101,7 +102,6 @@ class GeminiMaxConfig:
 
             # 安全配置 (从环境变量)
             stop=kwargs.get("stop", self.SAFETY_STOP_SEQUENCES),
-            model_kwargs=kwargs.get("model_kwargs", {"seed": self.SEED})
         )
     
     def get_model_info(self) -> Dict[str, Any]:
