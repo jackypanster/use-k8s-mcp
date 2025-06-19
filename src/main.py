@@ -89,17 +89,29 @@ async def main():
 
     # 执行K8s集群信息查询 - 验证系统功能
     try:
-        from .output_utils import request_log, response_log, step_log
+        from .output_utils import chain_start, chain_end, data_flow
+        
+        # 开始全链路追踪
+        main_call_id = chain_start("USER", "查询K8s集群信息", "用户发起集群信息查询请求")
         
         instruction = "使用 LIST_CLUSTERS 工具列出所有可用的Kubernetes集群，然后选择第一个集群使用 GET_CLUSTER_INFO 获取详细信息"
-        request_log("MAIN_AGENT", "获取集群信息", f"指令: {instruction}, max_steps: 30")
+        
+        # 数据流：用户指令 → Agent
+        data_flow("USER", "AGENT", "指令文本", len(instruction))
+        
+        agent_call_id = chain_start("AGENT", "执行查询指令", f"max_steps: 30, 指令长度: {len(instruction)} chars")
         
         result = await agent.run(
             instruction,
             max_steps=30,
         )
         
-        response_log("MAIN_AGENT", "获取集群信息", str(result))
+        # 数据流：Agent → 用户
+        data_flow("AGENT", "USER", "查询结果", len(str(result)))
+        
+        chain_end(agent_call_id, f"成功获取集群信息，结果长度: {len(str(result))} chars")
+        chain_end(main_call_id, "K8s集群信息查询完成")
+        
         success("K8s集群查询完成")
         success("集群数据获取", f"{result}")
 

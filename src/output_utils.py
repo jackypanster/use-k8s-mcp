@@ -6,6 +6,8 @@ K8s MCP Agent 统一输出工具
 import os
 from typing import Optional, Any
 from enum import Enum
+import time
+from datetime import datetime
 
 
 class OutputLevel(Enum):
@@ -187,4 +189,116 @@ def error_log(component: str, action: str, error_msg: str):
 
 def step_log(component: str, step_num: int, description: str):
     """记录步骤日志"""
-    print(f"📍 [{component}] Step {step_num}: {description}") 
+    print(f"📍 [{component}] Step {step_num}: {description}")
+
+# 全链路追踪日志系统
+class ChainTracker:
+    """调用链路追踪器"""
+    def __init__(self):
+        self.call_stack = []
+        self.call_id = 0
+        
+    def start_call(self, component: str, operation: str, details: str = "") -> int:
+        """开始一个调用"""
+        self.call_id += 1
+        call_info = {
+            'id': self.call_id,
+            'component': component,
+            'operation': operation,
+            'details': details,
+            'start_time': time.time(),
+            'timestamp': datetime.now().strftime("%H:%M:%S.%f")[:-3],
+            'level': len(self.call_stack)
+        }
+        self.call_stack.append(call_info)
+        
+        indent = "  " * call_info['level']
+        print(f"🚀 {indent}[{call_info['timestamp']}] #{call_info['id']} {component} → {operation}")
+        if details:
+            print(f"   {indent}📝 {details}")
+        
+        return self.call_id
+    
+    def end_call(self, call_id: int, result: str = "", error: str = ""):
+        """结束一个调用"""
+        if not self.call_stack:
+            return
+            
+        call_info = None
+        for i, call in enumerate(self.call_stack):
+            if call['id'] == call_id:
+                call_info = self.call_stack.pop(i)
+                break
+                
+        if not call_info:
+            return
+            
+        duration = time.time() - call_info['start_time']
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        indent = "  " * call_info['level']
+        
+        if error:
+            print(f"❌ {indent}[{timestamp}] #{call_id} {call_info['component']} ✗ {call_info['operation']} ({duration:.3f}s)")
+            print(f"   {indent}🚨 {error}")
+        else:
+            print(f"✅ {indent}[{timestamp}] #{call_id} {call_info['component']} ✓ {call_info['operation']} ({duration:.3f}s)")
+            if result:
+                truncated = result[:200] + "..." if len(result) > 200 else result
+                print(f"   {indent}📤 {truncated}")
+
+# 全局追踪器实例
+_tracker = ChainTracker()
+
+def chain_start(component: str, operation: str, details: str = "") -> int:
+    """开始链路追踪"""
+    return _tracker.start_call(component, operation, details)
+
+def chain_end(call_id: int, result: str = "", error: str = ""):
+    """结束链路追踪"""
+    _tracker.end_call(call_id, result, error)
+
+def llm_request(model: str, prompt: str, max_tokens: int = None):
+    """LLM请求日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    truncated_prompt = prompt[:300] + "..." if len(prompt) > 300 else prompt
+    print(f"🧠 [{timestamp}] LLM_REQUEST → {model}")
+    if max_tokens:
+        print(f"   📊 max_tokens: {max_tokens}")
+    print(f"   💭 {truncated_prompt}")
+
+def llm_response(model: str, response: str, tokens_used: int = None):
+    """LLM响应日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    truncated_response = response[:300] + "..." if len(response) > 300 else response
+    print(f"🧠 [{timestamp}] LLM_RESPONSE ← {model}")
+    if tokens_used:
+        print(f"   📊 tokens_used: {tokens_used}")
+    print(f"   💬 {truncated_response}")
+
+def mcp_tool_call(tool_name: str, params: dict):
+    """MCP工具调用日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    print(f"🔧 [{timestamp}] MCP_TOOL_CALL → {tool_name}")
+    print(f"   🔗 参数: {params}")
+
+def mcp_tool_response(tool_name: str, result: str, success: bool = True):
+    """MCP工具响应日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    status = "✅" if success else "❌"
+    truncated_result = result[:300] + "..." if len(result) > 300 else result
+    print(f"🔧 [{timestamp}] MCP_TOOL_RESPONSE {status} ← {tool_name}")
+    print(f"   📋 {truncated_result}")
+
+def agent_step(step_num: int, description: str, thinking: str = ""):
+    """Agent步骤日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    print(f"🤖 [{timestamp}] AGENT_STEP_{step_num}: {description}")
+    if thinking:
+        truncated_thinking = thinking[:200] + "..." if len(thinking) > 200 else thinking
+        print(f"   🤔 {truncated_thinking}")
+
+def data_flow(from_component: str, to_component: str, data_type: str, size: int = None):
+    """数据流转日志"""
+    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+    size_info = f" ({size} chars)" if size else ""
+    print(f"📊 [{timestamp}] DATA_FLOW: {from_component} → {to_component} | {data_type}{size_info}") 

@@ -302,16 +302,31 @@ class ClusterScanner:
                 instruction = f"使用 {tool_name} 工具获取K8s集群信息"
 
             # 通过Agent执行工具调用（关键修复！）
-            from ..output_utils import request_log, response_log
+            from ..output_utils import chain_start, chain_end, data_flow, agent_step
             
-            request_log("CLUSTER_SCANNER", f"执行工具调用", f"指令: {instruction}, max_steps: 30, timeout: {self.timeout}s")
+            scanner_call_id = chain_start("CLUSTER_SCANNER", "执行MCP工具调用", 
+                                        f"工具: {tool_name}, 超时: {self.timeout}s, max_steps: 30")
             
-            result = await asyncio.wait_for(
-                self.agent.run(instruction, max_steps=30),
-                timeout=self.timeout
-            )
+            # 数据流：Scanner → Agent
+            data_flow("CLUSTER_SCANNER", "AGENT", "MCP工具指令", len(instruction))
             
-            response_log("CLUSTER_SCANNER", "工具调用完成", str(result))
+            try:
+                agent_step(1, f"准备调用MCP工具: {tool_name}", f"指令: {instruction[:100]}...")
+                
+                result = await asyncio.wait_for(
+                    self.agent.run(instruction, max_steps=30),
+                    timeout=self.timeout
+                )
+                
+                # 数据流：Agent → Scanner
+                data_flow("AGENT", "CLUSTER_SCANNER", "MCP工具结果", len(str(result)))
+                
+                agent_step(2, f"MCP工具调用完成", f"结果长度: {len(str(result))} chars")
+                chain_end(scanner_call_id, f"成功执行工具 {tool_name}")
+                
+            except Exception as e:
+                chain_end(scanner_call_id, "", f"工具调用失败: {str(e)}")
+                raise
 
             return result
 
