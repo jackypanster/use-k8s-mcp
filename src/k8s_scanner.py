@@ -42,11 +42,13 @@ class K8sScanner:
                 print(f"✅ 工具发现成功: {result['tools_discovered']} 个工具")
                 return True
             else:
-                print(f"❌ 工具发现失败: {result['error']}")
+                from .output_utils import error
+                error("工具发现失败", result['error'])
                 return False
                 
         except Exception as e:
-            print(f"❌ 工具发现异常: {e}")
+            from .output_utils import error
+            error("工具发现异常", str(e))
             return False
     
     async def scan_cluster(self, cluster_name: str) -> bool:
@@ -62,11 +64,13 @@ class K8sScanner:
                 print(f"✅ 集群扫描成功: {result['total_resources']} 个资源")
                 return True
             else:
-                print(f"❌ 集群扫描失败: {result.get('errors', [])}")
+                from .output_utils import error
+                error("集群扫描失败", str(result.get('errors', [])))
                 return False
 
         except Exception as e:
-            print(f"❌ 集群扫描异常: {e}")
+            from .output_utils import error
+            error("集群扫描异常", str(e))
             return False
 
     async def discover_clusters(self) -> bool:
@@ -83,11 +87,13 @@ class K8sScanner:
                 print(f"✅ 集群发现成功: {len(clusters)} 个集群")
                 return True
             else:
-                print("❌ 未发现任何集群")
+                from .output_utils import error
+                error("未发现任何集群")
                 return False
 
         except Exception as e:
-            print(f"❌ 集群发现异常: {e}")
+            from .output_utils import error
+            error("集群发现异常", str(e))
             return False
     
     async def run_full_scan(self, cluster_name: str) -> bool:
@@ -101,7 +107,8 @@ class K8sScanner:
         if not tools:
             print("📋 未发现缓存的MCP工具，开始工具发现...")
             if not await self.discover_tools():
-                print("❌ 工具发现失败，无法继续扫描")
+                from .output_utils import error
+                error("工具发现失败，无法继续扫描")
                 return False
         else:
             print(f"📋 已发现 {len(tools)} 个缓存的MCP工具")
@@ -190,7 +197,8 @@ class K8sScanner:
                     print(f"   ... 还有 {len(services) - 10} 个")
             
         except Exception as e:
-            print(f"❌ 列出资源失败: {e}")
+            from .output_utils import error
+            error("列出资源失败", str(e))
 
 
 async def main():

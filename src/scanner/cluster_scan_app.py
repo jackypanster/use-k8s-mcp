@@ -121,7 +121,8 @@ class ClusterScanApp:
             return cluster_info
             
         except Exception as e:
-            print(f"❌ 集群信息扫描失败: {e}")
+            from ..output_utils import error
+            error("集群信息扫描失败", str(e))
             return None
     
     async def scan_namespaces(self, cluster_name: str) -> List[NamespaceInfo]:
@@ -148,7 +149,8 @@ class ClusterScanApp:
             return namespaces
             
         except Exception as e:
-            print(f"❌ 命名空间扫描失败: {e}")
+            from ..output_utils import error
+            error("命名空间扫描失败", str(e))
             return []
     
     async def scan_nodes(self, cluster_name: str) -> List[NodeInfo]:
@@ -175,7 +177,8 @@ class ClusterScanApp:
             return nodes
             
         except Exception as e:
-            print(f"❌ 节点扫描失败: {e}")
+            from ..output_utils import error
+            error("节点扫描失败", str(e))
             return []
     
     async def scan_pods(self, cluster_name: str, namespace: str = None) -> List[PodInfo]:
@@ -204,7 +207,8 @@ class ClusterScanApp:
             return pods
             
         except Exception as e:
-            print(f"❌ Pod扫描失败: {e}")
+            from ..output_utils import error
+            error("Pod扫描失败", str(e))
             return []
     
     async def scan_services(self, cluster_name: str, namespace: str = None) -> List[ServiceInfo]:
@@ -233,7 +237,8 @@ class ClusterScanApp:
             return services
             
         except Exception as e:
-            print(f"❌ 服务扫描失败: {e}")
+            from ..output_utils import error
+            error("服务扫描失败", str(e))
             return []
     
     def _parse_cluster_info(self, result: str, cluster_name: str) -> Optional[ClusterInfo]:

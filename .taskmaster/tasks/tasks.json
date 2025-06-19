@@ -1,0 +1,174 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "分析现有代码结构",
+        "description": "深入分析现有的K8s MCP Agent代码结构，识别重构优化点",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "- 分析src/main.py的核心业务逻辑\n- 识别冗余的print语句和输出\n- 分析模块依赖关系\n- 统计当前代码行数和复杂度",
+        "testStrategy": "- 运行现有测试确保功能完整\n- 记录当前性能基准\n- 验证所有环境配置正常",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "精简输出优化",
+        "description": "优化和精简控制台输出，保留关键信息",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "details": "- 识别并移除冗余的print语句\n- 统一输出格式和样式\n- 保留关键的成功/失败状态信息\n- 优化错误信息展示格式",
+        "testStrategy": "- 对比优化前后的输出内容\n- 确保关键信息不丢失\n- 验证错误处理输出的清晰度",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "精简main.py启动输出",
+            "description": "优化main.py中的启动横幅、配置信息和状态输出",
+            "details": "- 简化启动横幅 (= * 60 装饰线出现6次)\\n- 精简配置验证输出\\n- 优化LLM初始化信息显示\\n- 保留关键的成功/失败状态\\n- 统一表情符号使用规范",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
+          },
+          {
+            "id": 2,
+            "title": "优化错误处理输出格式",
+            "description": "标准化所有错误信息的输出格式，减少冗余的错误指导信息",
+            "details": "- 统一错误信息格式 (❌ 致命错误: ...)\\n- 简化排错提示信息\\n- 减少重复的配置检查说明\\n- 保持Fail Fast原则不变\\n- 确保错误信息的清晰度",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
+          },
+          {
+            "id": 3,
+            "title": "精简scanner模块输出",
+            "description": "优化scanner目录下各模块的调试输出和扫描信息",
+            "details": "- 减少cluster_scan_app.py中的详细输出 (约30个print)\\n- 简化tool_discovery.py的发现过程信息\\n- 优化scan_coordinator.py的扫描状态输出\\n- 保留关键的扫描统计信息\\n- 移除重复的成功/失败提示",
+            "status": "pending",
+            "dependencies": [
+              "2.1"
+            ],
+            "parentTaskId": 2
+          },
+          {
+            "id": 4,
+            "title": "优化cache模块输出",
+            "description": "精简缓存系统的操作日志和状态输出",
+            "details": "- 减少cache_manager.py中的详细操作日志\\n- 简化缓存命中/未命中的信息输出\\n- 优化TTL管理器的状态报告\\n- 保留关键的缓存统计信息\\n- 统一缓存相关的输出格式",
+            "status": "pending",
+            "dependencies": [
+              "2.1"
+            ],
+            "parentTaskId": 2
+          },
+          {
+            "id": 5,
+            "title": "创建统一输出工具函数",
+            "description": "创建标准化的输出工具函数，替代分散的print语句",
+            "details": "- 创建output_utils.py工具模块\\n- 定义标准的成功/失败/警告输出函数\\n- 实现可配置的详细度级别\\n- 提供统一的表情符号和格式规范\\n- 支持静默模式和详细模式切换",
+            "status": "pending",
+            "dependencies": [
+              "2.2"
+            ],
+            "parentTaskId": 2
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "重构长函数和复杂逻辑",
+        "description": "拆分长函数，提取公共逻辑，优化代码结构",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "details": "- 识别超过40行的长函数\n- 提取重复的逻辑为公共函数\n- 优化函数参数和返回值\n- 保持单一职责原则",
+        "testStrategy": "- 确保重构后功能无变化\n- 运行所有单元测试\n- 验证异常处理逻辑正确",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "优化导入和依赖管理",
+        "description": "清理和优化import语句，管理项目依赖",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "details": "- 移除未使用的import语句\n- 按照规范重新排序import\n- 优化相对导入路径\n- 检查依赖版本兼容性",
+        "testStrategy": "- 确保所有模块正常导入\n- 验证项目启动无错误\n- 检查依赖冲突",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "优化异常处理机制",
+        "description": "简化异常处理代码，保持Fail Fast原则",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          1,
+          3
+        ],
+        "details": "- 减少重复的异常处理代码\n- 优化异常上下文创建\n- 简化异常消息格式\n- 保持Fail Fast原则不变",
+        "testStrategy": "- 测试所有异常处理路径\n- 验证异常上下文完整性\n- 确保Fail Fast原则执行",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "优化配置管理逻辑",
+        "description": "简化配置验证和管理代码",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          4
+        ],
+        "details": "- 简化环境变量验证逻辑\n- 优化配置加载流程\n- 减少配置相关的输出信息\n- 保持配置验证的严格性",
+        "testStrategy": "- 测试各种配置场景\n- 验证配置错误处理\n- 确保配置验证完整性",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "优化MCP工具调用流程",
+        "description": "简化MCP工具加载和调用的实现",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          3,
+          5
+        ],
+        "details": "- 优化工具发现和加载逻辑\n- 简化工具调用的日志输出\n- 优化异步操作的实现\n- 减少不必要的中间步骤",
+        "testStrategy": "- 测试MCP工具调用功能\n- 验证工具加载性能\n- 确保异步操作正确",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "性能优化和最终验证",
+        "description": "进行性能优化并验证重构效果",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "details": "- 测量代码行数减少情况\n- 测量输出信息减少情况\n- 验证启动时间优化\n- 确保功能完整性100%",
+        "testStrategy": "- 运行完整测试套件\n- 对比优化前后性能指标\n- 验证main.py核心逻辑不变\n- 确保测试覆盖率≥85%",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-19T02:49:26.091Z",
+      "updated": "2025-06-19T03:24:02.210Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
