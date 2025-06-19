@@ -91,7 +91,7 @@ async def main():
     try:
         from .output_utils import request_log, response_log, step_log
         
-        instruction = "get the k8s cluster info"
+        instruction = "使用 LIST_CLUSTERS 工具列出所有可用的Kubernetes集群，然后选择第一个集群使用 GET_CLUSTER_INFO 获取详细信息"
         request_log("MAIN_AGENT", "获取集群信息", f"指令: {instruction}, max_steps: 30")
         
         result = await agent.run(
