@@ -81,7 +81,7 @@ async def main():
 
     try:
         # Create agent with the client
-        agent = MCPAgent(llm=llm, client=client, max_steps=10)
+        agent = MCPAgent(llm=llm, client=client, max_steps=30)
         success("K8s MCP Agent 创建成功")
     except Exception as e:
         fatal("Agent创建", str(e), "系统核心功能不可用")
@@ -89,10 +89,17 @@ async def main():
 
     # 执行K8s集群信息查询 - 验证系统功能
     try:
+        from .output_utils import request_log, response_log, step_log
+        
+        instruction = "get the k8s cluster info"
+        request_log("MAIN_AGENT", "获取集群信息", f"指令: {instruction}, max_steps: 30")
+        
         result = await agent.run(
-            "get the k8s cluster info",
-            max_steps=5,
+            instruction,
+            max_steps=30,
         )
+        
+        response_log("MAIN_AGENT", "获取集群信息", str(result))
         success("K8s集群查询完成")
         success("集群数据获取", f"{result}")
 

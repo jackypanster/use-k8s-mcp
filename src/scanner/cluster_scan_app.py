@@ -81,7 +81,7 @@ class ClusterScanApp:
             self.agent = MCPAgent(
                 llm=create_llm(),
                 client=mcp_client,
-                max_steps=10
+                max_steps=30
             )
             
         except Exception as e:
@@ -105,10 +105,13 @@ class ClusterScanApp:
         try:
             print(f"🔍 扫描集群信息: {cluster_name}")
             
-            result = await self.agent.run(
-                f"使用 GET_CLUSTER_INFO 工具获取集群 {cluster_name} 的详细信息",
-                max_steps=3
-            )
+            from ..output_utils import request_log, response_log
+            instruction = f"使用 GET_CLUSTER_INFO 工具获取集群 {cluster_name} 的详细信息"
+            request_log("CLUSTER_SCAN_APP", "扫描集群信息", f"指令: {instruction}, max_steps: 30")
+            
+            result = await self.agent.run(instruction, max_steps=30)
+            
+            response_log("CLUSTER_SCAN_APP", "扫描集群信息完成", str(result))
             
             # 解析结果并创建ClusterInfo对象
             cluster_info = self._parse_cluster_info(result, cluster_name)
@@ -135,7 +138,7 @@ class ClusterScanApp:
             
             result = await self.agent.run(
                 f"使用 LIST_NAMESPACES 工具列出集群 {cluster_name} 的所有命名空间",
-                max_steps=3
+                max_steps=30
             )
             
             # 解析结果并创建NamespaceInfo对象
@@ -163,7 +166,7 @@ class ClusterScanApp:
             
             result = await self.agent.run(
                 f"使用 LIST_NODES 工具列出集群 {cluster_name} 的所有节点",
-                max_steps=3
+                max_steps=30
             )
             
             # 解析结果并创建NodeInfo对象
@@ -194,7 +197,12 @@ class ClusterScanApp:
                 print(f"🔍 扫描Pod: {cluster_name} (所有命名空间)")
                 query = f"使用 LIST_CORE_RESOURCES 工具列出集群 {cluster_name} 中的所有Pod，参数：apiVersion=v1, kind=Pod"
             
-            result = await self.agent.run(query, max_steps=3)
+            from ..output_utils import request_log, response_log
+            request_log("CLUSTER_SCAN_APP", "扫描Pod", f"指令: {query}, max_steps: 30")
+            
+            result = await self.agent.run(query, max_steps=30)
+            
+            response_log("CLUSTER_SCAN_APP", "扫描Pod完成", str(result))
             
             # 解析结果并创建PodInfo对象
             pods = self._parse_pods(result, cluster_name)
@@ -224,7 +232,7 @@ class ClusterScanApp:
                 print(f"🔍 扫描服务: {cluster_name} (所有命名空间)")
                 query = f"使用 LIST_CORE_RESOURCES 工具列出集群 {cluster_name} 中的所有Service，参数：apiVersion=v1, kind=Service"
             
-            result = await self.agent.run(query, max_steps=3)
+            result = await self.agent.run(query, max_steps=30)
             
             # 解析结果并创建ServiceInfo对象
             services = self._parse_services(result, cluster_name)

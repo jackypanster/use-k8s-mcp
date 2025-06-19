@@ -58,7 +58,7 @@ async def list_available_tools():
         try:
             result = await cluster_scanner.agent.run(
                 "请列出所有可用的K8s相关工具和命令", 
-                max_steps=3
+                max_steps=30
             )
             print("✅ Agent响应:")
             print(f"   {result}")
@@ -102,7 +102,7 @@ async def list_available_tools():
             try:
                 result = await cluster_scanner.agent.run(
                     f"使用 {tool_name} 工具获取信息", 
-                    max_steps=2
+                    max_steps=30
                 )
                 
                 # 检查是否是"找不到工具"的错误
@@ -125,7 +125,7 @@ async def list_available_tools():
         try:
             result = await cluster_scanner.agent.run(
                 "我想获取K8s集群信息、命名空间列表、节点列表和Pod列表，请告诉我应该使用什么工具名称和参数", 
-                max_steps=3
+                max_steps=30
             )
             print("✅ Agent建议:")
             print(f"   {result}")

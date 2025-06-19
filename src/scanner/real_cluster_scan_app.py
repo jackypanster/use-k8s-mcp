@@ -97,7 +97,7 @@ class RealClusterScanApp:
             self.agent = MCPAgent(
                 llm=llm,
                 client=mcp_client,
-                max_steps=15  # 增加步数以处理复杂的真实数据
+                max_steps=30  # 统一步数设置
             )
             
         except Exception as e:
@@ -121,11 +121,14 @@ class RealClusterScanApp:
         try:
             print("🔍 发现所有可用集群...")
             
-            result = await self.agent.run(
-                "使用 GET_CLUSTER_INFO 工具获取所有可用的Kubernetes集群信息，"
-                "包括集群名称、描述、端点、版本和状态。请返回详细的集群列表。",
-                max_steps=5
-            )
+            from ..output_utils import request_log, response_log
+            instruction = ("使用 GET_CLUSTER_INFO 工具获取所有可用的Kubernetes集群信息，"
+                          "包括集群名称、描述、端点、版本和状态。请返回详细的集群列表。")
+            request_log("REAL_CLUSTER_SCAN", "获取集群列表", f"指令: {instruction}, max_steps: 30")
+            
+            result = await self.agent.run(instruction, max_steps=30)
+            
+            response_log("REAL_CLUSTER_SCAN", "获取集群列表完成", str(result))
             
             # 解析集群列表
             clusters = self._parse_cluster_list(result)
@@ -217,7 +220,7 @@ class RealClusterScanApp:
             result = await self.agent.run(
                 f"使用 GET_CLUSTER_INFO 工具获取集群 {cluster_name} 的详细信息，"
                 f"包括版本、端点、状态等。",
-                max_steps=3
+                max_steps=30
             )
             
             # 使用Gemini解析真实结果
@@ -243,7 +246,7 @@ class RealClusterScanApp:
                 f"需要提取的字段：name, version, endpoint, status, description\n\n"
                 f"原始文本：\n{result}\n\n"
                 f"请返回格式：{{'name': '...', 'version': '...', 'endpoint': '...', 'status': '...', 'description': '...'}}",
-                max_steps=2
+                max_steps=30
             )
             
             # 尝试解析JSON
@@ -313,7 +316,7 @@ class RealClusterScanApp:
             result = await self.agent.run(
                 f"使用 LIST_NAMESPACES 工具列出集群 {cluster_name} 的所有命名空间，"
                 f"包括命名空间名称、状态、标签等信息。",
-                max_steps=3
+                max_steps=30
             )
             
             # 使用Gemini解析真实结果
@@ -338,7 +341,7 @@ class RealClusterScanApp:
                 f"请从以下文本中提取所有命名空间的信息，每个命名空间包含name和status字段，"
                 f"以JSON数组格式返回：[{{'name': '...', 'status': '...'}}]\n\n"
                 f"原始文本：\n{result}",
-                max_steps=2
+                max_steps=30
             )
             
             namespaces = []

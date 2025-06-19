@@ -66,7 +66,7 @@ class ToolDiscovery:
             self.agent = MCPAgent(
                 llm=create_llm(),
                 client=mcp_client,
-                max_steps=10
+                max_steps=30
             )
             
         except Exception as e:
@@ -85,7 +85,7 @@ class ToolDiscovery:
                 "请列出所有可用的K8s MCP工具，包括每个工具的名称、描述、输入参数、输出格式等详细信息。"
                 "请以结构化的JSON格式返回，包含以下字段：name, description, input_schema, output_schema, "
                 "resource_types, operation_types, required_params, optional_params。",
-                max_steps=5
+                max_steps=30
             )
             
             # 解析Agent返回的结果

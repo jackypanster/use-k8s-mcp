@@ -164,4 +164,27 @@ class StandardErrors:
 
 def standard_fatal_error(error_type: dict, error_detail: str):
     """标准化致命错误输出"""
-    fatal(error_type["operation"], error_detail, error_type["guide"]) 
+    fatal(error_type["operation"], error_detail, error_type["guide"])
+
+
+# 新增request/response日志功能
+def request_log(component: str, action: str, request_data: str, max_length: int = 500):
+    """记录请求日志"""
+    truncated_data = request_data[:max_length] + "..." if len(request_data) > max_length else request_data
+    print(f"🔄 [{component}] REQUEST: {action}")
+    print(f"   📤 {truncated_data}")
+    
+def response_log(component: str, action: str, response_data: str, max_length: int = 500):
+    """记录响应日志"""
+    truncated_data = response_data[:max_length] + "..." if len(response_data) > max_length else response_data
+    print(f"✅ [{component}] RESPONSE: {action}")
+    print(f"   📥 {truncated_data}")
+    
+def error_log(component: str, action: str, error_msg: str):
+    """记录错误日志"""
+    print(f"❌ [{component}] ERROR: {action}")
+    print(f"   🚨 {error_msg}")
+
+def step_log(component: str, step_num: int, description: str):
+    """记录步骤日志"""
+    print(f"📍 [{component}] Step {step_num}: {description}") 

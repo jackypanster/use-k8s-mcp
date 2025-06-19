@@ -58,7 +58,7 @@ class ClusterScanner:
 
         # 创建LLM和Agent（关键修复！）
         self.llm = create_llm()
-        self.agent = MCPAgent(llm=self.llm, client=mcp_client, max_steps=5)
+        self.agent = MCPAgent(llm=self.llm, client=mcp_client, max_steps=30)
 
         # 统计信息
         self.scan_count = 0
@@ -302,10 +302,16 @@ class ClusterScanner:
                 instruction = f"使用 {tool_name} 工具获取K8s集群信息"
 
             # 通过Agent执行工具调用（关键修复！）
+            from ..output_utils import request_log, response_log
+            
+            request_log("CLUSTER_SCANNER", f"执行工具调用", f"指令: {instruction}, max_steps: 30, timeout: {self.timeout}s")
+            
             result = await asyncio.wait_for(
-                self.agent.run(instruction, max_steps=3),
+                self.agent.run(instruction, max_steps=30),
                 timeout=self.timeout
             )
+            
+            response_log("CLUSTER_SCANNER", "工具调用完成", str(result))
 
             return result
 
