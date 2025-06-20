@@ -33,32 +33,32 @@ async def extract_tool_list():
     提取所有K8s MCP工具列表
     复用 src/tool_discovery.py 中已验证的配置
     """
-    print("📋 开始获取工具列表...")
+    print(f"🚀 begin extract_tool_list()")
+    try:
+        # 加载环境变量
+        load_dotenv()
 
-    # 加载环境变量
-    load_dotenv()
+        # 复用已验证的 MCP 配置（无 type 字段）
+        server_name = os.getenv("MCP_SERVER_NAME")
+        server_url = os.getenv("MCP_SERVER_URL")
 
-    # 复用已验证的 MCP 配置（无 type 字段）
-    server_name = os.getenv("MCP_SERVER_NAME")
-    server_url = os.getenv("MCP_SERVER_URL")
-
-    mcp_config = {
-        "mcpServers": {
-            server_name: {
-                "url": server_url
+        mcp_config = {
+            "mcpServers": {
+                server_name: {
+                    "url": server_url
+                }
             }
         }
-    }
 
-    # 创建已验证的组件
-    client = MCPClient.from_dict(mcp_config)
-    llm = create_llm()
-    agent = MCPAgent(llm=llm, client=client, max_steps=10)
+        # 创建已验证的组件
+        client = MCPClient.from_dict(mcp_config)
+        llm = create_llm()
+        agent = MCPAgent(llm=llm, client=client, max_steps=10)
 
-    print(f"🔗 MCP服务器: {server_url}")
+        print(f"🔗 MCP服务器: {server_url}")
 
-    # 获取工具列表 - 使用与 tool_discovery.py 相同的严格指令
-    tools_result = await agent.run(
+        # 获取工具列表 - 使用与 tool_discovery.py 相同的严格指令
+        tools_result = await agent.run(
         """列出所有可用的工具名称，只返回工具名称列表，不要添加任何解释。
         严格要求：
 1. 绝对不要编造、修改、删减或压缩任何返回数据
@@ -68,27 +68,31 @@ async def extract_tool_list():
 5. 如果工具调用失败，必须明确报告失败原因，不得提供任何模拟数据
 
 你的职责仅限于：数据格式化和可读性优化，严禁任何形式的数据创造或修改。""",
-        max_steps=5
-    )
+            max_steps=5
+        )
 
-    print(f"🛠️ 工具列表原始响应:\n{tools_result}")
-    print(f"🛠️ 工具列表原始响应长度: {len(tools_result)} chars")
+        print(f"🛠️ 工具列表原始响应:\n{tools_result}")
+        print(f"🛠️ 工具列表原始响应长度: {len(tools_result)} chars")
 
-    # 解析工具列表 - 复用 tool_discovery.py 的解析逻辑
-    tool_names = []
-    lines = tools_result.split('\n')
-    for line in lines:
-        line = line.strip()
-        if line and not line.startswith('Thought:') and not line.startswith('Final Answer:'):
-            # 移除可能的序号和特殊字符
-            clean_line = line.replace('*', '').replace('-', '').replace('•', '').strip()
-            if clean_line and len(clean_line) > 2:  # 过滤掉太短的行
-                tool_names.append(clean_line)
+        # 解析工具列表 - 复用 tool_discovery.py 的解析逻辑
+        tool_names = []
+        lines = tools_result.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('Thought:') and not line.startswith('Final Answer:'):
+                # 移除可能的序号和特殊字符
+                clean_line = line.replace('*', '').replace('-', '').replace('•', '').strip()
+                if clean_line and len(clean_line) > 2:  # 过滤掉太短的行
+                    tool_names.append(clean_line)
 
-    print(f"📊 解析出: {tool_names}")
-    print(f"📊 解析出 {len(tool_names)} 个工具名称")
+        print(f"📊 解析出: {tool_names}")
+        print(f"📊 解析出 {len(tool_names)} 个工具名称")
 
-    return tool_names
+        print(f"✅ end extract_tool_list() - success (tools_count={len(tool_names)})")
+        return tool_names
+    except Exception as e:
+        print(f"❌ end extract_tool_list() - failed: {e}")
+        raise
 
 
 def save_tool_list(tools, output_dir):
@@ -99,30 +103,32 @@ def save_tool_list(tools, output_dir):
         tools: 工具名称列表
         output_dir: 输出目录路径
     """
-    print("💾 开始保存工具列表...")
+    print(f"🚀 begin save_tool_list(tools_count={len(tools)}, output_dir={output_dir})")
+    try:
+        # 确保输出目录存在
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 确保输出目录存在
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+        # 构建工具列表数据结构
+        tool_list_data = {
+            "total_count": len(tools),
+            "tools": tools
+        }
 
-    # 构建工具列表数据结构
-    tool_list_data = {
-        "total_count": len(tools),
-        "extraction_timestamp": "2025-06-20",
-        "data_integrity_principle": "绝对不编造、修改、删减或压缩任何返回数据",
-        "tools": tools
-    }
+        # 保存到JSON文件
+        output_file = output_dir / "tool_list.json"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(tool_list_data, f, ensure_ascii=False, indent=2)
 
-    # 保存到JSON文件
-    output_file = output_dir / "tool_list.json"
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(tool_list_data, f, ensure_ascii=False, indent=2)
+        print(f"✅ 工具列表已保存到: {output_file}")
+        print(f"📊 包含 {len(tools)} 个工具名称")
+        print(f"📁 文件大小: {output_file.stat().st_size} bytes")
 
-    print(f"✅ 工具列表已保存到: {output_file}")
-    print(f"📊 包含 {len(tools)} 个工具名称")
-    print(f"📁 文件大小: {output_file.stat().st_size} bytes")
-
-    return output_file
+        print(f"✅ end save_tool_list(tools_count={len(tools)}, output_dir={output_dir}) - success")
+        return output_file
+    except Exception as e:
+        print(f"❌ end save_tool_list(tools_count={len(tools)}, output_dir={output_dir}) - failed: {e}")
+        raise
 
 
 def load_completed_list(output_dir):
@@ -135,17 +141,19 @@ def load_completed_list(output_dir):
     Returns:
         list: 已完成的工具名称列表
     """
-    output_dir = Path(output_dir)
-    completed_file = output_dir / "completed_schemas.json"
-
-    print(f"📋 读取已完成清单: {completed_file}")
-
-    # 如果文件不存在，返回空列表
-    if not completed_file.exists():
-        print(f"   ℹ️  清单文件不存在，初始化为空列表")
-        return []
-
+    print(f"🚀 begin load_completed_list(output_dir={output_dir})")
     try:
+        output_dir = Path(output_dir)
+        completed_file = output_dir / "completed_schemas.json"
+
+        print(f"📋 读取已完成清单: {completed_file}")
+
+        # 如果文件不存在，返回空列表
+        if not completed_file.exists():
+            print(f"   ℹ️  清单文件不存在，初始化为空列表")
+            print(f"✅ end load_completed_list(output_dir={output_dir}) - success (count=0)")
+            return []
+
         with open(completed_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
@@ -159,13 +167,16 @@ def load_completed_list(output_dir):
             if len(completed_tools) > 5:
                 print(f"      ... 还有 {len(completed_tools) - 5} 个")
 
+        print(f"✅ end load_completed_list(output_dir={output_dir}) - success (count={len(completed_tools)})")
         return completed_tools
 
     except json.JSONDecodeError as e:
         print(f"   ❌ 清单文件格式错误: {e}")
+        print(f"❌ end load_completed_list(output_dir={output_dir}) - failed: {e}")
         raise Exception(f"已完成清单文件损坏: {completed_file}")
     except Exception as e:
         print(f"   ❌ 读取清单文件失败: {e}")
+        print(f"❌ end load_completed_list(output_dir={output_dir}) - failed: {e}")
         raise
 
 
@@ -177,40 +188,43 @@ def add_to_completed_list(tool_name, output_dir):
         tool_name: 工具名称
         output_dir: 输出目录路径
     """
-    output_dir = Path(output_dir)
-    completed_file = output_dir / "completed_schemas.json"
-
-    print(f"📝 更新已完成清单: {tool_name}")
-
-    # 读取现有清单
-    completed_tools = load_completed_list(output_dir) if completed_file.exists() else []
-
-    # 避免重复添加
-    if tool_name in completed_tools:
-        print(f"   ℹ️  工具已在清单中: {tool_name}")
-        return
-
-    # 添加新工具
-    completed_tools.append(tool_name)
-
-    # 构建清单数据结构
-    completed_data = {
-        "completed_tools": completed_tools,
-        "total_completed": len(completed_tools),
-        "last_updated": "2025-06-20",
-        "data_integrity_principle": "绝对不编造、修改、删减或压缩任何返回数据"
-    }
-
-    # 保存到文件
+    print(f"🚀 begin add_to_completed_list(tool_name={tool_name}, output_dir={output_dir})")
     try:
+        output_dir = Path(output_dir)
+        completed_file = output_dir / "completed_schemas.json"
+
+        print(f"📝 更新已完成清单: {tool_name}")
+
+        # 读取现有清单
+        completed_tools = load_completed_list(output_dir) if completed_file.exists() else []
+
+        # 避免重复添加
+        if tool_name in completed_tools:
+            print(f"   ℹ️  工具已在清单中: {tool_name}")
+            print(f"✅ end add_to_completed_list(tool_name={tool_name}, output_dir={output_dir}) - success (already_exists)")
+            return
+
+        # 添加新工具
+        completed_tools.append(tool_name)
+
+        # 构建清单数据结构
+        completed_data = {
+            "completed_tools": completed_tools,
+            "total_completed": len(completed_tools)
+        }
+
+        # 保存到文件
         with open(completed_file, 'w', encoding='utf-8') as f:
             json.dump(completed_data, f, ensure_ascii=False, indent=2)
 
         print(f"   ✅ 清单已更新: {len(completed_tools)} 个工具")
         print(f"   📁 文件大小: {completed_file.stat().st_size} bytes")
 
+        print(f"✅ end add_to_completed_list(tool_name={tool_name}, output_dir={output_dir}) - success (added)")
+
     except Exception as e:
         print(f"   ❌ 更新清单失败: {e}")
+        print(f"❌ end add_to_completed_list(tool_name={tool_name}, output_dir={output_dir}) - failed: {e}")
         raise Exception(f"无法更新已完成清单: {e}")
 
 
@@ -226,37 +240,39 @@ async def save_tool_schema(tool_name, real_schema_data, output_dir):
     Returns:
         Path: 保存的文件路径
     """
-    print(f"💾 保存工具schema: {tool_name}")
+    print(f"🚀 begin save_tool_schema(tool_name={tool_name}, output_dir={output_dir})")
+    try:
+        # 确保输出目录存在
+        output_dir = Path(output_dir)
+        tools_dir = output_dir / "tools"
+        tools_dir.mkdir(parents=True, exist_ok=True)
 
-    # 确保输出目录存在
-    output_dir = Path(output_dir)
-    tools_dir = output_dir / "tools"
-    tools_dir.mkdir(parents=True, exist_ok=True)
+        # 构建schema数据结构，保持原始数据完整性
+        schema_file_data = {
+            "tool_name": tool_name,
+            "schema": real_schema_data  # 保持原始schema数据不变
+        }
 
-    # 构建schema数据结构，保持原始数据完整性
-    schema_file_data = {
-        "tool_name": tool_name,
-        "extraction_timestamp": "2025-06-20",
-        "data_integrity_principle": "绝对不编造、修改、删减或压缩任何返回数据",
-        "schema": real_schema_data  # 保持原始schema数据不变
-    }
+        # 生成文件名：工具名称.json
+        output_file = tools_dir / f"{tool_name}.json"
 
-    # 生成文件名：工具名称.json
-    output_file = tools_dir / f"{tool_name}.json"
+        # 保存到JSON文件
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(schema_file_data, f, ensure_ascii=False, indent=2)
 
-    # 保存到JSON文件
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(schema_file_data, f, ensure_ascii=False, indent=2)
+        # 验证文件保存成功
+        if output_file.exists():
+            file_size = output_file.stat().st_size
+            print(f"   ✅ 已保存: {output_file.name} ({file_size} bytes)")
+        else:
+            print(f"   ❌ 保存失败: {output_file}")
+            raise Exception(f"工具schema保存失败: {tool_name}")
 
-    # 验证文件保存成功
-    if output_file.exists():
-        file_size = output_file.stat().st_size
-        print(f"   ✅ 已保存: {output_file.name} ({file_size} bytes)")
-    else:
-        print(f"   ❌ 保存失败: {output_file}")
-        raise Exception(f"工具schema保存失败: {tool_name}")
-
-    return output_file
+        print(f"✅ end save_tool_schema(tool_name={tool_name}, output_dir={output_dir}) - success")
+        return output_file
+    except Exception as e:
+        print(f"❌ end save_tool_schema(tool_name={tool_name}, output_dir={output_dir}) - failed: {e}")
+        raise
 
 
 async def extract_single_tool_schema(tool_name, output_dir):
@@ -271,8 +287,7 @@ async def extract_single_tool_schema(tool_name, output_dir):
     Returns:
         bool: 是否成功获取并保存
     """
-    print(f"🔧 获取工具schema: {tool_name}")
-
+    print(f"🚀 begin extract_single_tool_schema(tool_name={tool_name}, output_dir={output_dir})")
     try:
         # 1. 调用 get_tool_schema() 获取真实schema数据
         print(f"   📡 调用MCP工具获取schema...")
@@ -294,11 +309,13 @@ async def extract_single_tool_schema(tool_name, output_dir):
         add_to_completed_list(tool_name, output_dir)
 
         print(f"   ✅ 工具schema处理完成: {tool_name}")
+        print(f"✅ end extract_single_tool_schema(tool_name={tool_name}, output_dir={output_dir}) - success")
         return True
 
     except Exception as e:
         print(f"   ❌ 工具schema获取失败: {tool_name}")
         print(f"   💥 错误详情: {e}")
+        print(f"❌ end extract_single_tool_schema(tool_name={tool_name}, output_dir={output_dir}) - failed: {e}")
         return False
 
 
