@@ -1,4 +1,5 @@
 {
+  "name": "TROUBLESHOOT_PODS_PROMPT",
   "description": "Kubernetes Pod问题排查",
   "parameters": {
     "type": "object",
@@ -17,6 +18,5 @@
     "required": [
       "pod_status"
     ]
-  },
-  "name": "TROUBLESHOOT_PODS_PROMPT"
+  }
 }
