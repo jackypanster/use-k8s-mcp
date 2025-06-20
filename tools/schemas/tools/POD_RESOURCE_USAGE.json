@@ -1,0 +1,4 @@
+{
+  "tool_name": "POD_RESOURCE_USAGE",
+  "schema": "Thought: The user is asking for the schema of the `POD_RESOURCE_USAGE` tool. This information is available in the tool definitions. I need to extract the relevant details and present them in a JSON format. I will look for the `POD_RESOURCE_USAGE` function in the provided tool definitions and extract its arguments, their types, and whether they are required.\n"
+}

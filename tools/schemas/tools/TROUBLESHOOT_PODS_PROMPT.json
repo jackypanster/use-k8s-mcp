@@ -1,0 +1,27 @@
+{
+  "tool_name": "TROUBLESHOOT_PODS_PROMPT",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "name": "TROUBLESHOOT_PODS_PROMPT",
+    "description": "Kubernetes Pod问题排查",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pod_status": {
+          "type": "string",
+          "description": "Pod状态 (例如 CrashLoopBackOff, Pending, ImagePullBackOff)"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "pod_logs": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pod_status"
+      ]
+    }
+  }
+}

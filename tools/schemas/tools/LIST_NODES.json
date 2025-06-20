@@ -1,0 +1,4 @@
+{
+  "tool_name": "LIST_NODES",
+  "schema": "Thought: The user is asking for the schema information of the `LIST_NODES` tool. This information is not directly available through any of the provided tools. The available tools are for interacting with Kubernetes clusters and organizations, not for introspecting the tool definitions themselves. Therefore, I cannot fulfill this request using the given tools.\nFinal Answer: I cannot provide the schema information for the `LIST_NODES` tool using the available tools. My capabilities are limited to interacting with Kubernetes resources and organizations as defined by the provided tool functions."
+}

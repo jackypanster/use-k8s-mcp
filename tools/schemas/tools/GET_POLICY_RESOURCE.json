@@ -1,0 +1,4 @@
+{
+  "tool_name": "GET_POLICY_RESOURCE",
+  "schema": "Thought: The user is asking for the schema of the `GET_POLICY_RESOURCE` tool. This information is not directly available through any of the provided tools. The available tools are for interacting with Kubernetes clusters and organizations, not for introspecting the tool definitions themselves. Therefore, I cannot fulfill this request using the given tools.\nFinal Answer: I cannot provide the schema information for the `GET_POLICY_RESOURCE` tool using the available tools. My capabilities are limited to interacting with Kubernetes clusters and organizations as defined by the provided tool functions."
+}

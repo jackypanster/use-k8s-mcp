@@ -1,0 +1,41 @@
+{
+  "tool_name": "LIST_BATCH_RESOURCES",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "tool_name": "LIST_BATCH_RESOURCES",
+    "description": "List batch Kubernetes resources (namespace-scoped)",
+    "parameters": [
+      {
+        "name": "apiVersion",
+        "type": "string",
+        "description": "API Version",
+        "required": true
+      },
+      {
+        "name": "cluster",
+        "type": "string",
+        "description": "Cluster name",
+        "required": true
+      },
+      {
+        "name": "kind",
+        "type": "string",
+        "description": "Kind of resource",
+        "required": true
+      },
+      {
+        "name": "labelSelector",
+        "type": "string",
+        "description": null,
+        "required": false
+      },
+      {
+        "name": "namespace",
+        "type": "string",
+        "description": null,
+        "required": false
+      }
+    ]
+  }
+}

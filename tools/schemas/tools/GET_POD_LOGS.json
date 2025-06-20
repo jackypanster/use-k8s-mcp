@@ -1,10 +1,10 @@
 {
-  "tool_name": "ANALYZE_POD_LOGS",
+  "tool_name": "GET_POD_LOGS",
   "extraction_timestamp": null,
   "data_integrity_principle": null,
   "schema": {
-    "name": "ANALYZE_POD_LOGS",
-    "description": "Analyze logs from a Pod and provide insights",
+    "name": "GET_POD_LOGS",
+    "description": "Get logs from a Pod",
     "parameters": {
       "type": "object",
       "properties": {
@@ -19,22 +19,26 @@
         "container": {
           "type": "string"
         },
-        "errorPattern": {
-          "type": "string"
-        },
         "namespace": {
           "type": "string"
         },
         "previous": {
-          "type": "string",
-          "format": "boolean"
-        },
-        "prompt": {
-          "type": "string"
+          "type": [
+            "boolean",
+            "string"
+          ]
         },
         "tailLines": {
-          "type": "string",
-          "format": "number"
+          "type": [
+            "number",
+            "string"
+          ]
+        },
+        "timestamps": {
+          "type": [
+            "boolean",
+            "string"
+          ]
         }
       },
       "required": [

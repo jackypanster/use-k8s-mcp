@@ -1,0 +1,39 @@
+{
+  "tool_name": "GET_EVENTS",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "name": "GET_EVENTS",
+    "description": "Get events for a resource",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "API Version"
+        },
+        "cluster": {
+          "type": "string",
+          "description": "Cluster name"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind of resource"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the resource"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "cluster",
+        "kind",
+        "name"
+      ]
+    }
+  }
+}

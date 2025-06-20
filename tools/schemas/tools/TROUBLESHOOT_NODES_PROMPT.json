@@ -1,0 +1,4 @@
+{
+  "tool_name": "TROUBLESHOOT_NODES_PROMPT",
+  "schema": "Agent stopped after reaching the maximum number of steps (10)."
+}

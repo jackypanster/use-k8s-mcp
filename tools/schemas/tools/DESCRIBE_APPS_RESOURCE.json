@@ -1,0 +1,35 @@
+{
+  "tool_name": "DESCRIBE_APPS_RESOURCE",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "name": "DESCRIBE_APPS_RESOURCE",
+    "description": "Describe a specific apps resource with detailed information (namespace-scoped)",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "cluster": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "cluster",
+        "kind",
+        "name"
+      ]
+    }
+  }
+}

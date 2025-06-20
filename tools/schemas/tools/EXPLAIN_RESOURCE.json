@@ -1,0 +1,41 @@
+{
+  "tool_name": "EXPLAIN_RESOURCE",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "tool_name": "EXPLAIN_RESOURCE",
+    "description": "Explain resource structure",
+    "parameters": [
+      {
+        "name": "apiVersion",
+        "type": "string",
+        "description": "API Version",
+        "required": true
+      },
+      {
+        "name": "cluster",
+        "type": "string",
+        "description": "Cluster name",
+        "required": true
+      },
+      {
+        "name": "kind",
+        "type": "string",
+        "description": "Kind of resource",
+        "required": true
+      },
+      {
+        "name": "field",
+        "type": "string",
+        "description": null,
+        "required": false
+      },
+      {
+        "name": "recursive",
+        "type": "boolean | string",
+        "description": null,
+        "required": false
+      }
+    ]
+  }
+}

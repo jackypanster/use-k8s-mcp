@@ -1,0 +1,41 @@
+{
+  "tool_name": "DESCRIBE_STORAGE_RESOURCE",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "tool_name": "DESCRIBE_STORAGE_RESOURCE",
+    "description": "Describe a specific storage.k8s.io resource with detailed information (namespace-scoped)",
+    "parameters": [
+      {
+        "name": "apiVersion",
+        "type": "string",
+        "description": "API Version",
+        "required": true
+      },
+      {
+        "name": "cluster",
+        "type": "string",
+        "description": "Cluster name",
+        "required": true
+      },
+      {
+        "name": "kind",
+        "type": "string",
+        "description": "Kind of resource",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the resource",
+        "required": true
+      },
+      {
+        "name": "namespace",
+        "type": "string",
+        "description": "Namespace of the resource",
+        "required": false
+      }
+    ]
+  }
+}

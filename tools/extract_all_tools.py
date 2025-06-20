@@ -328,8 +328,67 @@ async def extract_all_schemas(tools, output_dir):
         tools: 工具名称列表
         output_dir: 输出目录路径
     """
-    # TODO: 实现批量schema提取逻辑
-    pass
+    print(f"🚀 begin extract_all_schemas(tools_count={len(tools)}, output_dir={output_dir})")
+    try:
+        # 1. 读取已完成清单，跳过已完成的工具
+        print(f"📋 检查已完成的工具...")
+        completed_tools = load_completed_list(output_dir)
+
+        # 获取待处理的工具列表
+        pending_tools = [tool for tool in tools if tool not in completed_tools]
+
+        print(f"📊 进度状态:")
+        print(f"   总工具数: {len(tools)}")
+        print(f"   已完成: {len(completed_tools)}")
+        print(f"   待处理: {len(pending_tools)}")
+        print(f"   完成率: {len(completed_tools)/len(tools)*100:.1f}%")
+
+        if not pending_tools:
+            print(f"🎉 所有工具schema已获取完成！")
+            print(f"✅ end extract_all_schemas(tools_count={len(tools)}, output_dir={output_dir}) - success (all_completed)")
+            return
+
+        # 2. 单线程串行处理待处理工具
+        print(f"\n🔄 开始批量获取schema...")
+        print(f"📝 处理顺序: {pending_tools[:5]}{'...' if len(pending_tools) > 5 else ''}")
+
+        success_count = 0
+        failed_tool = None
+
+        for i, tool_name in enumerate(pending_tools, 1):
+            print(f"\n🔧 [{i}/{len(pending_tools)}] 处理工具: {tool_name}")
+            print(f"   进度: {(len(completed_tools) + i - 1)/len(tools)*100:.1f}% → {(len(completed_tools) + i)/len(tools)*100:.1f}%")
+
+            # 调用单个工具schema获取函数
+            success = await extract_single_tool_schema(tool_name, output_dir)
+
+            if success:
+                success_count += 1
+                print(f"   ✅ 成功: {tool_name} ({success_count}/{len(pending_tools)})")
+            else:
+                # 3. 失败时立即停止（fail-fast）
+                failed_tool = tool_name
+                print(f"   ❌ 失败: {tool_name}")
+                print(f"💥 批量获取中断，fail-fast原则")
+                break
+
+        # 最终统计
+        final_completed = load_completed_list(output_dir)
+        final_completion_rate = len(final_completed)/len(tools)*100
+
+        print(f"\n📊 批量获取结果:")
+        print(f"   本次处理: {success_count}/{len(pending_tools)} 成功")
+        print(f"   总体进度: {len(final_completed)}/{len(tools)} ({final_completion_rate:.1f}%)")
+
+        if failed_tool:
+            print(f"❌ end extract_all_schemas(tools_count={len(tools)}, output_dir={output_dir}) - failed: {failed_tool}")
+            raise Exception(f"工具schema获取失败: {failed_tool}")
+        else:
+            print(f"✅ end extract_all_schemas(tools_count={len(tools)}, output_dir={output_dir}) - success (processed={success_count})")
+
+    except Exception as e:
+        print(f"❌ end extract_all_schemas(tools_count={len(tools)}, output_dir={output_dir}) - failed: {e}")
+        raise
 
 
 async def main():
@@ -360,25 +419,11 @@ async def main():
         saved_file = save_tool_list(tools, output_dir)
         print(f"✅ Task 2.2 完成: 工具列表已保存到 {saved_file}")
 
-        # Task 3.2.2: 测试单一工具Schema获取函数
-        print("\n📋 Task 3.2.2: 测试单一工具Schema获取函数...")
+        # 批量获取所有工具的schema
+        print("\n📋 开始批量获取所有工具schema...")
+        await extract_all_schemas(tools, output_dir)
 
-        # 选择第一个工具进行真实schema获取测试
-        test_tool_name = tools[0]
-        print(f"🧪 测试工具: {test_tool_name}")
-        print(f"📡 使用真实MCP工具调用获取schema...")
-
-        # 测试真实的schema获取
-        success = await extract_single_tool_schema(test_tool_name, output_dir)
-
-        if success:
-            print(f"✅ Task 3.2.2 完成: 真实schema获取成功")
-            print(f"   🎯 测试工具: {test_tool_name}")
-            print(f"   📁 schema文件: tools/{test_tool_name}.json")
-            print(f"   📝 已更新完成清单")
-        else:
-            print(f"❌ Task 3.2.2 失败: 真实schema获取失败")
-            raise Exception(f"真实schema获取测试失败: {test_tool_name}")
+        print(f"✅ 所有工具schema获取完成")
 
         return tools
     except Exception as e:

@@ -1,0 +1,17 @@
+{
+  "tool_name": "LIST_USERS",
+  "extraction_timestamp": null,
+  "data_integrity_principle": null,
+  "schema": {
+    "tool_name": "LIST_USERS",
+    "description": "List the user informations of an organization (also means 'system')",
+    "parameters": [
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Name of the organization",
+        "required": true
+      }
+    ]
+  }
+}
