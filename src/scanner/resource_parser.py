@@ -9,7 +9,6 @@ from typing import Dict, List, Any, Optional, Union
 from datetime import datetime
 
 from .exceptions import ResourceParseError, ScanValidationError
-from src.fail_fast_exceptions import create_exception_context
 from src.cache.models import (
     ClusterInfo, NamespaceInfo, NodeInfo, PodInfo, ServiceInfo
 )
@@ -68,14 +67,7 @@ class ResourceParser:
             
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation="parse_cluster_info",
-                cluster_name=cluster_name,
-                raw_data_keys=list(raw_data.keys()) if isinstance(raw_data, dict) else [],
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ResourceParseError(f"集群信息解析失败: {e}", context) from e
+            raise ResourceParseError(f"集群信息解析失败: {e}") from e
     
     def parse_namespaces(
         self,

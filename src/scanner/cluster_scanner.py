@@ -12,7 +12,6 @@ from mcp_use import MCPClient, MCPAgent
 from .exceptions import (
     ScanError, ClusterConnectionError, ToolNotFoundError, ScanTimeoutError
 )
-from src.fail_fast_exceptions import create_exception_context
 from src.mcp_tools import MCPToolLoader
 from src.llm_config import create_llm
 
@@ -101,13 +100,7 @@ class ClusterScanner:
             
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation="scan_static_resources",
-                cluster_name=cluster_name,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ScanError(f"静态资源扫描失败: {e}", context) from e
+            raise ScanError(f"静态资源扫描失败: {e}") from e
     
     async def scan_dynamic_resources(
         self,
@@ -153,14 +146,7 @@ class ClusterScanner:
             
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation="scan_dynamic_resources",
-                cluster_name=cluster_name,
-                namespace=namespace,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ScanError(f"动态资源扫描失败: {e}", context) from e
+            raise ScanError(f"动态资源扫描失败: {e}") from e
     
     async def _scan_cluster_info(self, cluster_name: Optional[str]) -> Dict[str, Any]:
         """扫描集群信息"""
@@ -301,64 +287,22 @@ class ClusterScanner:
             else:
                 instruction = f"使用 {tool_name} 工具获取K8s集群信息"
 
-            # 通过Agent执行工具调用（关键修复！）
-            from ..output_utils import chain_start, chain_end, data_flow, agent_step
-            
-            scanner_call_id = chain_start("CLUSTER_SCANNER", "执行MCP工具调用", 
-                                        f"工具: {tool_name}, 超时: {self.timeout}s, max_steps: 30")
-            
-            # 数据流：Scanner → Agent
-            data_flow("CLUSTER_SCANNER", "AGENT", "MCP工具指令", len(instruction))
-            
-            try:
-                agent_step(1, f"准备调用MCP工具: {tool_name}", f"指令: {instruction[:100]}...")
-                
-                result = await asyncio.wait_for(
-                    self.agent.run(instruction, max_steps=30),
-                    timeout=self.timeout
-                )
-                
-                # 数据流：Agent → Scanner
-                data_flow("AGENT", "CLUSTER_SCANNER", "MCP工具结果", len(str(result)))
-                
-                agent_step(2, f"MCP工具调用完成", f"结果长度: {len(str(result))} chars")
-                chain_end(scanner_call_id, f"成功执行工具 {tool_name}")
-                
-            except Exception as e:
-                chain_end(scanner_call_id, "", f"工具调用失败: {str(e)}")
-                raise
+            # 通过Agent执行工具调用
+            result = await asyncio.wait_for(
+                self.agent.run(instruction, max_steps=30),
+                timeout=self.timeout
+            )
 
             return result
 
         except asyncio.TimeoutError as e:
-            context = create_exception_context(
-                operation="call_mcp_tool",
-                tool_name=tool_name,
-                params=params,
-                timeout=self.timeout,
-                execution_time=time.time() - start_time
-            )
-            raise ScanTimeoutError(f"MCP工具调用超时: {tool_name}", context) from e
+            raise ScanTimeoutError(f"MCP工具调用超时: {tool_name}") from e
 
         except ConnectionError as e:
-            context = create_exception_context(
-                operation="call_mcp_tool",
-                tool_name=tool_name,
-                params=params,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ClusterConnectionError(f"集群连接失败: {e}", context) from e
+            raise ClusterConnectionError(f"集群连接失败: {e}") from e
 
         except Exception as e:
-            context = create_exception_context(
-                operation="call_mcp_tool",
-                tool_name=tool_name,
-                params=params,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ScanError(f"MCP工具调用失败: {e}", context) from e
+            raise ScanError(f"MCP工具调用失败: {e}") from e
     
     def get_scan_stats(self) -> Dict[str, Any]:
         """获取扫描统计信息"""

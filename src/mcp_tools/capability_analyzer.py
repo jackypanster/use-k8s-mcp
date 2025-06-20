@@ -10,7 +10,6 @@ from typing import Dict, Any, List, Set
 
 from .models import ToolCapabilities, ToolSchema, K8S_RESOURCE_TYPES, K8S_OPERATION_TYPES
 from .exceptions import CapabilityAnalysisError
-from src.fail_fast_exceptions import create_exception_context
 
 
 class CapabilityAnalyzer:
@@ -79,13 +78,7 @@ class CapabilityAnalyzer:
 
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation=f"analyze_tool_capabilities_{tool_schema.name}",
-                tool_name=tool_schema.name,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise CapabilityAnalysisError(f"工具能力分析失败: {e}", context) from e
+            raise CapabilityAnalysisError(f"工具能力分析失败: {e}") from e
 
     def _perform_core_analysis(self, tool_schema: ToolSchema) -> Dict[str, Any]:
         """执行核心分析逻辑"""

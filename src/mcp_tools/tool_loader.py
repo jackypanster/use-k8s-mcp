@@ -14,7 +14,6 @@ from .capability_analyzer import CapabilityAnalyzer
 from .models import ToolSchema, ToolCapabilities
 from .exceptions import MCPConnectionError, ToolLoadError
 from src.cache import CacheManager, MCPToolInfo
-from src.fail_fast_exceptions import create_exception_context
 
 
 class MCPToolLoader:
@@ -75,17 +74,11 @@ class MCPToolLoader:
             
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation="load_tools",
-                execution_time=time.time() - start_time,
-                timeout=self.timeout,
-                original_error=str(e)
-            )
-            
+
             if "connection" in str(e).lower():
-                raise MCPConnectionError(f"MCP工具加载失败: {e}", context) from e
+                raise MCPConnectionError(f"MCP工具加载失败: {e}") from e
             else:
-                raise ToolLoadError(f"工具加载失败: {e}", context) from e
+                raise ToolLoadError(f"工具加载失败: {e}") from e
     
     async def get_tool_capabilities(
         self,
@@ -119,12 +112,7 @@ class MCPToolLoader:
             return capabilities
             
         except Exception as e:
-            context = create_exception_context(
-                operation="get_tool_capabilities",
-                tool_name=tool_name,
-                original_error=str(e)
-            )
-            raise ToolLoadError(f"获取工具能力失败: {e}", context) from e
+            raise ToolLoadError(f"获取工具能力失败: {e}") from e
     
     def refresh_tool_cache(self) -> None:
         """刷新工具缓存"""
@@ -136,11 +124,7 @@ class MCPToolLoader:
             asyncio.run(self.load_tools())
             
         except Exception as e:
-            context = create_exception_context(
-                operation="refresh_tool_cache",
-                original_error=str(e)
-            )
-            raise ToolLoadError(f"刷新工具缓存失败: {e}", context) from e
+            raise ToolLoadError(f"刷新工具缓存失败: {e}") from e
     
     async def _discover_tools(self) -> List[Dict[str, Any]]:
         """发现可用的MCP工具"""
@@ -250,12 +234,7 @@ class MCPToolLoader:
             self.cache_manager.batch_create_records('mcp_tools', tool_infos)
             
         except Exception as e:
-            context = create_exception_context(
-                operation="cache_tools",
-                tool_count=len(tool_infos),
-                original_error=str(e)
-            )
-            raise ToolLoadError(f"缓存工具信息失败: {e}", context) from e
+            raise ToolLoadError(f"缓存工具信息失败: {e}") from e
     
     def get_loading_stats(self) -> Dict[str, Any]:
         """获取加载统计信息"""

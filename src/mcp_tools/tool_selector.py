@@ -13,10 +13,9 @@ from .models import (
     K8S_RESOURCE_TYPES, K8S_OPERATION_TYPES
 )
 from src.cache import CacheManager
-from src.fail_fast_exceptions import create_exception_context, K8sAgentException
 
 
-class ToolSelectionError(K8sAgentException):
+class ToolSelectionError(Exception):
     """工具选择失败异常"""
     pass
 
@@ -64,15 +63,7 @@ class ToolSelector:
             return best_tool
 
         except Exception as e:
-            context = create_exception_context(
-                operation="select_best_tool",
-                intent=intent,
-                resource_type=resource_type,
-                operation_type=operation_type,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ToolSelectionError(f"工具选择失败: {e}", context) from e
+            raise ToolSelectionError(f"工具选择失败: {e}") from e
 
     def _execute_selection_process(
         self,
@@ -147,13 +138,7 @@ class ToolSelector:
             return compatible_tools
             
         except Exception as e:
-            context = create_exception_context(
-                operation="get_compatible_tools",
-                resource_type=resource_type,
-                operation_type=operation_type,
-                original_error=str(e)
-            )
-            raise ToolSelectionError(f"获取兼容工具失败: {e}", context) from e
+            raise ToolSelectionError(f"获取兼容工具失败: {e}") from e
     
     def rank_tools_by_relevance(
         self,

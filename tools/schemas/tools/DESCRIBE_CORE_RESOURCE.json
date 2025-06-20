@@ -1,0 +1,4 @@
+{
+  "tool_name": "DESCRIBE_CORE_RESOURCE",
+  "schema": "Thought: The user is asking for the schema of the `DESCRIBE_CORE_RESOURCE` tool. I need to provide the input parameters, their types, and whether they are required, in JSON format. I will use the `default_api.DESCRIBE_CORE_RESOURCE` function definition to extract this information.\n"
+}

@@ -12,7 +12,6 @@ from datetime import datetime, timedelta, timezone
 from .cluster_scanner import ClusterScanner
 from .resource_parser import ResourceParser
 from .exceptions import ScanError, ScanTimeoutError
-from src.fail_fast_exceptions import create_exception_context
 from src.cache import CacheManager, CacheMetadata
 
 
@@ -108,16 +107,8 @@ class ScanCoordinator:
         except Exception as e:
             self.failed_scans += 1
             await self._update_scan_status(cluster_name, 'all', 'failed', str(e))
-            
-            context = create_exception_context(
-                operation="scan_cluster_full",
-                cluster_name=cluster_name,
-                include_static=include_static,
-                include_dynamic=include_dynamic,
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise ScanError(f"集群完整扫描失败: {e}", context) from e
+
+            raise ScanError(f"集群完整扫描失败: {e}") from e
     
     async def _scan_static_with_retry(self, cluster_name: str) -> Dict[str, Any]:
         """带重试的静态资源扫描"""
@@ -446,13 +437,7 @@ class ScanCoordinator:
             return history
 
         except Exception as e:
-            context = create_exception_context(
-                operation="get_scan_history",
-                cluster_name=cluster_name,
-                limit=limit,
-                original_error=str(e)
-            )
-            raise ScanError(f"获取扫描历史失败: {e}", context) from e
+            raise ScanError(f"获取扫描历史失败: {e}") from e
 
     async def cleanup_expired_cache(self) -> Dict[str, int]:
         """清理过期缓存数据
@@ -487,8 +472,4 @@ class ScanCoordinator:
             return cleanup_stats
 
         except Exception as e:
-            context = create_exception_context(
-                operation="cleanup_expired_cache",
-                original_error=str(e)
-            )
-            raise ScanError(f"清理过期缓存失败: {e}", context) from e
+            raise ScanError(f"清理过期缓存失败: {e}") from e

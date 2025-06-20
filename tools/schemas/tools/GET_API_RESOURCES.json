@@ -1,0 +1,4 @@
+{
+  "tool_name": "GET_API_RESOURCES",
+  "schema": "Thought: The user is asking for the schema of the `GET_API_RESOURCES` tool. This information is available in the OpenAPI specification. I need to describe the input parameters, their types, and whether they are required. I will present this information in a JSON format.\nFinal Answer: ```json\n{\n  \"tool_name\": \"GET_API_RESOURCES\",\n  \"description\": \"Get available API resources in the cluster\",\n  \"parameters\": [\n    {\n      \"name\": \"cluster\",\n      \"type\": \"string\",\n      \"description\": \"Cluster name\",\n      \"required\": true\n    },\n    {\n      \"name\": \"group\",\n      \"type\": \"string\",\n      \"description\": \"Group\",\n      \"required\": false\n    }\n  ]\n}\n"
+}

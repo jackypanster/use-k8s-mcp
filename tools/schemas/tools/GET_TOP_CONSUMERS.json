@@ -1,0 +1,4 @@
+{
+  "tool_name": "GET_TOP_CONSUMERS",
+  "schema": "```json\n{\n  \"name\": \"GET_TOP_CONSUMERS\",\n  \"description\": \"Get Pods with highest resource consumption\",\n  \"parameters\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"cluster\": {\n        \"type\": \"string\",\n        \"description\": \"Cluster name\"\n      },\n      \"resource\": {\n        \"type\": \"string\",\n        \"description\": \"Resource type (cpu, memory)\"\n      },\n      \"fieldSelector\": {\n        \"type\": \"string\"\n      },\n      \"labelSelector\": {\n        \"type\": \"string\"\n      },\n      \"limit\": {\n        \"type\": [\n          \"number\",\n          \"string\"\n        ]\n      },\n      \"namespace\": {\n        \"type\": \"string\"\n      }\n    },\n    \"required\": [\n      \"cluster\",\n      \"resource\"\n    ]\n  }\n}\n"
+}

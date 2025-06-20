@@ -10,7 +10,6 @@ from typing import Dict, Any, List, Tuple, Optional
 
 from .models import ToolSchema
 from .exceptions import SchemaParseError
-from src.fail_fast_exceptions import create_exception_context
 
 
 class SchemaParser:
@@ -62,14 +61,7 @@ class SchemaParser:
             
         except Exception as e:
             self.error_count += 1
-            context = create_exception_context(
-                operation=f"parse_tool_schema_{tool_data.get('name', 'unknown')}",
-                tool_name=tool_data.get('name'),
-                tool_data_keys=list(tool_data.keys()),
-                execution_time=time.time() - start_time,
-                original_error=str(e)
-            )
-            raise SchemaParseError(f"工具schema解析失败: {e}", context) from e
+            raise SchemaParseError(f"工具schema解析失败: {e}") from e
     
     def extract_parameters(
         self, 
@@ -96,12 +88,7 @@ class SchemaParser:
             return required_params, optional_params
             
         except Exception as e:
-            context = create_exception_context(
-                operation="extract_parameters",
-                schema_keys=list(schema.keys()) if isinstance(schema, dict) else [],
-                original_error=str(e)
-            )
-            raise SchemaParseError(f"参数提取失败: {e}", context) from e
+            raise SchemaParseError(f"参数提取失败: {e}") from e
     
     def validate_schema(self, schema: Dict[str, Any]) -> bool:
         """验证schema有效性

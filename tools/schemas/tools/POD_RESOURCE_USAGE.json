@@ -1,0 +1,4 @@
+{
+  "tool_name": "POD_RESOURCE_USAGE",
+  "schema": "```json\n{\n  \"name\": \"POD_RESOURCE_USAGE\",\n  \"description\": \"获取Kubernetes Pod资源使用情况\",\n  \"parameters\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"namespace\": {\n        \"type\": \"string\"\n      },\n      \"pod_name\": {\n        \"type\": \"string\"\n      },\n      \"sort_by\": {\n        \"type\": \"string\"\n      }\n    }\n  }\n}\n"
+}

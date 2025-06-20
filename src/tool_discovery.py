@@ -127,14 +127,14 @@ async def get_tool_schema(tool_name: str):
     
     client = MCPClient.from_dict(mcp_config)
     llm = create_llm()
-    agent = MCPAgent(llm=llm, client=client, max_steps=20)
+    agent = MCPAgent(llm=llm, client=client, max_steps=100)
 
     print(f"🔍 获取工具 {tool_name} 的 schema")
     print("-" * 40)
 
     result = await agent.run(
-        f"获取工具 {tool_name} 的完整 schema 信息，包括输入参数、类型、是否必需等详细信息",
-        max_steps=10
+        f"获取工具 {tool_name} 的完整 schema 信息，包括输入参数、类型、是否必需等详细信息。要求：1. 绝对不编造、修改、删减或压缩任何返回数据；2. 不改变返回数据，用JSON格式结构化返回",
+        max_steps=100
     )
     
     print(f"📋 {tool_name} Schema:")
