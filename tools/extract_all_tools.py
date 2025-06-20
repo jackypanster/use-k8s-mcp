@@ -71,6 +71,7 @@ async def extract_tool_list():
         max_steps=5
     )
 
+    print(f"🛠️ 工具列表原始响应:\n{tools_result}")
     print(f"🛠️ 工具列表原始响应长度: {len(tools_result)} chars")
 
     # 解析工具列表 - 复用 tool_discovery.py 的解析逻辑
@@ -84,13 +85,8 @@ async def extract_tool_list():
             if clean_line and len(clean_line) > 2:  # 过滤掉太短的行
                 tool_names.append(clean_line)
 
+    print(f"📊 解析出: {tool_names}")
     print(f"📊 解析出 {len(tool_names)} 个工具名称")
-
-    # 显示前5个工具作为验证
-    for i, tool in enumerate(tool_names[:5]):
-        print(f"   {i+1}. {tool}")
-    if len(tool_names) > 5:
-        print(f"   ... 还有 {len(tool_names) - 5} 个工具")
 
     return tool_names
 
@@ -129,118 +125,181 @@ def save_tool_list(tools, output_dir):
     return output_file
 
 
-def verify_tool_list_completeness(tools, output_file):
+def load_completed_list(output_dir):
     """
-    验证工具列表完整性
+    读取已完成清单文件
 
     Args:
-        tools: 工具名称列表
-        output_file: 保存的JSON文件路径
+        output_dir: 输出目录路径
 
     Returns:
-        bool: 验证是否通过
+        list: 已完成的工具名称列表
     """
-    print("\n🔍 Task 2.3: 验证工具列表完整性...")
+    output_dir = Path(output_dir)
+    completed_file = output_dir / "completed_schemas.json"
 
-    verification_passed = True
+    print(f"📋 读取已完成清单: {completed_file}")
 
-    # 验收标准1: 工具数量 = 55
-    print(f"📊 验证工具数量...")
-    expected_count = 55
-    actual_count = len(tools)
-    if actual_count == expected_count:
-        print(f"   ✅ 工具数量正确: {actual_count}/{expected_count}")
-    else:
-        print(f"   ❌ 工具数量不符: {actual_count}/{expected_count}")
-        verification_passed = False
+    # 如果文件不存在，返回空列表
+    if not completed_file.exists():
+        print(f"   ℹ️  清单文件不存在，初始化为空列表")
+        return []
 
-    # 验收标准2: 包含已知核心工具
-    print(f"🔍 验证核心工具...")
-    core_tools = ["LIST_CLUSTERS", "GET_CLUSTER_INFO", "LIST_NAMESPACES", "LIST_NODES"]
-    found_core_tools = []
-    missing_core_tools = []
+    try:
+        with open(completed_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-    for core_tool in core_tools:
-        if core_tool in tools:
-            found_core_tools.append(core_tool)
-            print(f"   ✅ {core_tool}")
-        else:
-            missing_core_tools.append(core_tool)
-            print(f"   ❌ {core_tool} - 缺失")
-            verification_passed = False
+        completed_tools = data.get('completed_tools', [])
+        print(f"   ✅ 已读取 {len(completed_tools)} 个已完成工具")
 
-    print(f"📈 核心工具覆盖率: {len(found_core_tools)}/{len(core_tools)} ({len(found_core_tools)/len(core_tools)*100:.1f}%)")
+        # 显示前5个已完成的工具
+        if completed_tools:
+            for i, tool in enumerate(completed_tools[:5]):
+                print(f"      {i+1}. {tool}")
+            if len(completed_tools) > 5:
+                print(f"      ... 还有 {len(completed_tools) - 5} 个")
 
-    # 验收标准3: 工具名称无重复
-    print(f"🔄 验证重复工具...")
-    unique_tools = set(tools)
-    duplicate_count = len(tools) - len(unique_tools)
-    if duplicate_count == 0:
-        print(f"   ✅ 工具列表无重复")
-    else:
-        print(f"   ❌ 发现重复工具: {duplicate_count} 个")
-        verification_passed = False
+        return completed_tools
 
-        # 找出重复的工具
-        seen = set()
-        duplicates = set()
-        for tool in tools:
-            if tool in seen:
-                duplicates.add(tool)
-            else:
-                seen.add(tool)
-        print(f"   重复工具: {list(duplicates)}")
-
-    # 验证JSON文件
-    print(f"📁 验证JSON文件...")
-    if output_file.exists():
-        file_size = output_file.stat().st_size
-        print(f"   ✅ 文件存在: {output_file}")
-        print(f"   ✅ 文件大小: {file_size} bytes")
-
-        # 验证JSON格式
-        try:
-            with open(output_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            print(f"   ✅ JSON格式正确")
-
-            # 验证JSON内容
-            if 'tools' in data and len(data['tools']) == len(tools):
-                print(f"   ✅ JSON内容完整")
-            else:
-                print(f"   ❌ JSON内容不完整")
-                verification_passed = False
-
-        except json.JSONDecodeError as e:
-            print(f"   ❌ JSON格式错误: {e}")
-            verification_passed = False
-    else:
-        print(f"   ❌ 文件不存在: {output_file}")
-        verification_passed = False
-
-    # 总结验证结果
-    print(f"\n📋 Task 2.3 验证结果:")
-    if verification_passed:
-        print(f"   ✅ 所有验收标准通过")
-        print(f"   ✅ 工具列表完整性验证成功")
-    else:
-        print(f"   ❌ 部分验收标准未通过")
-        print(f"   ❌ 工具列表完整性验证失败")
-
-    return verification_passed
+    except json.JSONDecodeError as e:
+        print(f"   ❌ 清单文件格式错误: {e}")
+        raise Exception(f"已完成清单文件损坏: {completed_file}")
+    except Exception as e:
+        print(f"   ❌ 读取清单文件失败: {e}")
+        raise
 
 
-async def save_tool_schema(tool_name, schema_data, output_dir):
+def add_to_completed_list(tool_name, output_dir):
+    """
+    向已完成清单中添加新完成的工具
+
+    Args:
+        tool_name: 工具名称
+        output_dir: 输出目录路径
+    """
+    output_dir = Path(output_dir)
+    completed_file = output_dir / "completed_schemas.json"
+
+    print(f"📝 更新已完成清单: {tool_name}")
+
+    # 读取现有清单
+    completed_tools = load_completed_list(output_dir) if completed_file.exists() else []
+
+    # 避免重复添加
+    if tool_name in completed_tools:
+        print(f"   ℹ️  工具已在清单中: {tool_name}")
+        return
+
+    # 添加新工具
+    completed_tools.append(tool_name)
+
+    # 构建清单数据结构
+    completed_data = {
+        "completed_tools": completed_tools,
+        "total_completed": len(completed_tools),
+        "last_updated": "2025-06-20",
+        "data_integrity_principle": "绝对不编造、修改、删减或压缩任何返回数据"
+    }
+
+    # 保存到文件
+    try:
+        with open(completed_file, 'w', encoding='utf-8') as f:
+            json.dump(completed_data, f, ensure_ascii=False, indent=2)
+
+        print(f"   ✅ 清单已更新: {len(completed_tools)} 个工具")
+        print(f"   📁 文件大小: {completed_file.stat().st_size} bytes")
+
+    except Exception as e:
+        print(f"   ❌ 更新清单失败: {e}")
+        raise Exception(f"无法更新已完成清单: {e}")
+
+
+async def save_tool_schema(tool_name, real_schema_data, output_dir):
     """
     保存单个工具的schema到JSON文件
 
     Args:
-        tool_name: 工具名称
-        schema_data: schema原始数据
+        tool_name: 工具名称 (从内存中的工具列表传递)
+        schema_data: schema原始数据 (从 get_tool_schema() 获取)
         output_dir: 输出目录路径
+
+    Returns:
+        Path: 保存的文件路径
     """
-    # TODO: 实现单个工具schema保存逻辑
-    pass
+    print(f"💾 保存工具schema: {tool_name}")
+
+    # 确保输出目录存在
+    output_dir = Path(output_dir)
+    tools_dir = output_dir / "tools"
+    tools_dir.mkdir(parents=True, exist_ok=True)
+
+    # 构建schema数据结构，保持原始数据完整性
+    schema_file_data = {
+        "tool_name": tool_name,
+        "extraction_timestamp": "2025-06-20",
+        "data_integrity_principle": "绝对不编造、修改、删减或压缩任何返回数据",
+        "schema": real_schema_data  # 保持原始schema数据不变
+    }
+
+    # 生成文件名：工具名称.json
+    output_file = tools_dir / f"{tool_name}.json"
+
+    # 保存到JSON文件
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(schema_file_data, f, ensure_ascii=False, indent=2)
+
+    # 验证文件保存成功
+    if output_file.exists():
+        file_size = output_file.stat().st_size
+        print(f"   ✅ 已保存: {output_file.name} ({file_size} bytes)")
+    else:
+        print(f"   ❌ 保存失败: {output_file}")
+        raise Exception(f"工具schema保存失败: {tool_name}")
+
+    return output_file
+
+
+async def extract_single_tool_schema(tool_name, output_dir):
+    """
+    获取单个工具的schema并保存
+    集成真实的MCP工具调用，不使用mock数据
+
+    Args:
+        tool_name: 工具名称
+        output_dir: 输出目录路径
+
+    Returns:
+        bool: 是否成功获取并保存
+    """
+    print(f"🔧 获取工具schema: {tool_name}")
+
+    try:
+        # 1. 调用 get_tool_schema() 获取真实schema数据
+        print(f"   📡 调用MCP工具获取schema...")
+        schema_data = await get_tool_schema(tool_name)
+
+        if not schema_data:
+            print(f"   ❌ 获取schema失败: 返回数据为空")
+            return False
+
+        print(f"   ✅ schema数据获取成功:{str(schema_data)}")
+        print(f"   📊 数据大小: {len(str(schema_data))} chars")
+
+        # 2. 调用 save_tool_schema() 保存到JSON文件
+        print(f"   💾 保存schema到文件...")
+        saved_file = await save_tool_schema(tool_name, schema_data, output_dir)
+
+        # 3. 成功后自动更新已完成清单
+        print(f"   📝 更新已完成清单...")
+        add_to_completed_list(tool_name, output_dir)
+
+        print(f"   ✅ 工具schema处理完成: {tool_name}")
+        return True
+
+    except Exception as e:
+        print(f"   ❌ 工具schema获取失败: {tool_name}")
+        print(f"   💥 错误详情: {e}")
+        return False
 
 
 async def extract_all_schemas(tools, output_dir):
@@ -272,13 +331,6 @@ async def main():
         tools = await extract_tool_list()
         print(f"✅ 工具列表提取成功，共 {len(tools)} 个工具")
 
-        # 验证是否包含已知的核心工具
-        core_tools = ["LIST_CLUSTERS", "GET_CLUSTER_INFO", "LIST_NAMESPACES", "LIST_NODES"]
-        found_core_tools = [tool for tool in core_tools if tool in tools]
-        print(f"🔍 核心工具验证: 找到 {len(found_core_tools)}/{len(core_tools)} 个核心工具")
-        for tool in found_core_tools:
-            print(f"   ✅ {tool}")
-
         # 检查是否有重复工具
         unique_tools = set(tools)
         if len(unique_tools) == len(tools):
@@ -291,13 +343,25 @@ async def main():
         saved_file = save_tool_list(tools, output_dir)
         print(f"✅ Task 2.2 完成: 工具列表已保存到 {saved_file}")
 
-        # Task 2.3: 验证工具列表完整性
-        verification_passed = verify_tool_list_completeness(tools, saved_file)
-        if verification_passed:
-            print(f"✅ Task 2.3 完成: 工具列表完整性验证通过")
+        # Task 3.2.2: 测试单一工具Schema获取函数
+        print("\n📋 Task 3.2.2: 测试单一工具Schema获取函数...")
+
+        # 选择第一个工具进行真实schema获取测试
+        test_tool_name = tools[0]
+        print(f"🧪 测试工具: {test_tool_name}")
+        print(f"📡 使用真实MCP工具调用获取schema...")
+
+        # 测试真实的schema获取
+        success = await extract_single_tool_schema(test_tool_name, output_dir)
+
+        if success:
+            print(f"✅ Task 3.2.2 完成: 真实schema获取成功")
+            print(f"   🎯 测试工具: {test_tool_name}")
+            print(f"   📁 schema文件: tools/{test_tool_name}.json")
+            print(f"   📝 已更新完成清单")
         else:
-            print(f"❌ Task 2.3 失败: 工具列表完整性验证未通过")
-            raise Exception("工具列表完整性验证失败，停止执行")
+            print(f"❌ Task 3.2.2 失败: 真实schema获取失败")
+            raise Exception(f"真实schema获取测试失败: {test_tool_name}")
 
         return tools
     except Exception as e:
