@@ -1,4 +1,1 @@
-{
-  "tool_name": "LIST_CORE_RESOURCES",
-  "schema": "Thought: The user is asking for the schema of the `LIST_CORE_RESOURCES` tool. This information is available in the OpenAPI specification. I should be able to retrieve this information and present it in a structured JSON format. I will look for the `LIST_CORE_RESOURCES` function definition and extract the relevant details about its parameters.\n"
-}
+"Thought: The user is asking for the schema of the `LIST_CORE_RESOURCES` tool. This information is available in the OpenAPI specification. I should be able to retrieve this information and present it in a structured JSON format. I will look for the `LIST_CORE_RESOURCES` function definition and extract the relevant details about its parameters.\n"

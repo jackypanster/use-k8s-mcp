@@ -1,46 +1,41 @@
 {
-  "tool_name": "ANALYZE_POD_LOGS",
-  "extraction_timestamp": null,
-  "data_integrity_principle": null,
-  "schema": {
-    "name": "ANALYZE_POD_LOGS",
-    "description": "Analyze logs from a Pod and provide insights",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "cluster": {
-          "type": "string",
-          "description": "Cluster name"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the Pod"
-        },
-        "container": {
-          "type": "string"
-        },
-        "errorPattern": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "previous": {
-          "type": "string",
-          "format": "boolean"
-        },
-        "prompt": {
-          "type": "string"
-        },
-        "tailLines": {
-          "type": "string",
-          "format": "number"
-        }
+  "name": "ANALYZE_POD_LOGS",
+  "description": "Analyze logs from a Pod and provide insights",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "cluster": {
+        "type": "string",
+        "description": "Cluster name"
       },
-      "required": [
-        "cluster",
-        "name"
-      ]
-    }
+      "name": {
+        "type": "string",
+        "description": "Name of the Pod"
+      },
+      "container": {
+        "type": "string"
+      },
+      "errorPattern": {
+        "type": "string"
+      },
+      "namespace": {
+        "type": "string"
+      },
+      "previous": {
+        "type": "string",
+        "format": "boolean"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "tailLines": {
+        "type": "string",
+        "format": "number"
+      }
+    },
+    "required": [
+      "cluster",
+      "name"
+    ]
   }
 }

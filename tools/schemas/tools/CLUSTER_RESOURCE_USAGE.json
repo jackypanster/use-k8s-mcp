@@ -1,4 +1,1 @@
-{
-  "tool_name": "CLUSTER_RESOURCE_USAGE",
-  "schema": "Thought: The user is asking for the schema of the `CLUSTER_RESOURCE_USAGE` tool. I need to provide the input parameters, their types, and whether they are required, in JSON format. I will use the `help` function to get the schema information for the `CLUSTER_RESOURCE_USAGE` tool.\n"
-}
+"Thought: The user is asking for the schema of the `CLUSTER_RESOURCE_USAGE` tool. I need to provide the input parameters, their types, and whether they are required, in JSON format. I will use the `help` function to get the schema information for the `CLUSTER_RESOURCE_USAGE` tool.\n"

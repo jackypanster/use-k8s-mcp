@@ -1,41 +1,36 @@
 {
-  "tool_name": "LIST_AUTOSCALING_RESOURCES",
-  "extraction_timestamp": null,
-  "data_integrity_principle": null,
-  "schema": {
-    "tool_name": "LIST_AUTOSCALING_RESOURCES",
-    "description": "List autoscaling Kubernetes resources (namespace-scoped)",
-    "parameters": [
-      {
-        "name": "apiVersion",
-        "type": "string",
-        "required": true,
-        "description": "API Version, e.g., \"autoscaling/v1\""
-      },
-      {
-        "name": "cluster",
-        "type": "string",
-        "required": true,
-        "description": "Cluster name"
-      },
-      {
-        "name": "kind",
-        "type": "string",
-        "required": true,
-        "description": "Kind of resource, e.g., \"HorizontalPodAutoscaler\""
-      },
-      {
-        "name": "labelSelector",
-        "type": "string",
-        "required": false,
-        "description": "Label selector for filtering resources"
-      },
-      {
-        "name": "namespace",
-        "type": "string",
-        "required": false,
-        "description": "Namespace. Required if the resource is namespace-scoped."
-      }
-    ]
-  }
+  "description": "List autoscaling Kubernetes resources (namespace-scoped)",
+  "parameters": [
+    {
+      "name": "apiVersion",
+      "type": "string",
+      "required": true,
+      "description": "API Version, e.g., \"autoscaling/v1\""
+    },
+    {
+      "name": "cluster",
+      "type": "string",
+      "required": true,
+      "description": "Cluster name"
+    },
+    {
+      "name": "kind",
+      "type": "string",
+      "required": true,
+      "description": "Kind of resource, e.g., \"HorizontalPodAutoscaler\""
+    },
+    {
+      "name": "labelSelector",
+      "type": "string",
+      "required": false,
+      "description": "Label selector for filtering resources"
+    },
+    {
+      "name": "namespace",
+      "type": "string",
+      "required": false,
+      "description": "Namespace. Required if the resource is namespace-scoped."
+    }
+  ],
+  "name": "LIST_AUTOSCALING_RESOURCES"
 }

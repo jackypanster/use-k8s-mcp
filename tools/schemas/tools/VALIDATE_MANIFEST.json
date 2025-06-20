@@ -1,4 +1,1 @@
-{
-  "tool_name": "VALIDATE_MANIFEST",
-  "schema": "Thought: The user is asking for the schema information of the `VALIDATE_MANIFEST` tool. I need to provide the input parameters, their types, and whether they are required. I should present this information in a structured JSON format without any modifications.\n"
-}
+"Thought: The user is asking for the schema information of the `VALIDATE_MANIFEST` tool. I need to provide the input parameters, their types, and whether they are required. I should present this information in a structured JSON format without any modifications.\n"

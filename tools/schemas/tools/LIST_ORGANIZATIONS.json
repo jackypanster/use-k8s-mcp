@@ -1,35 +1,30 @@
 {
-  "tool_name": "LIST_ORGANIZATIONS",
-  "extraction_timestamp": null,
-  "data_integrity_principle": null,
-  "schema": {
-    "tool_name": "LIST_ORGANIZATIONS",
-    "description": "List organizations (also means 'systems') by paging. If you want to get all organizations, you need to call this tool repeatedly by incrementing the page parameter until the returned pageStatus.is_end is true.",
-    "parameters": [
-      {
-        "name": "detail",
-        "type": "boolean | string",
-        "required": false,
-        "description": ""
-      },
-      {
-        "name": "page",
-        "type": "float | string",
-        "required": false,
-        "description": ""
-      },
-      {
-        "name": "size",
-        "type": "float | string",
-        "required": false,
-        "description": ""
-      },
-      {
-        "name": "withAdmin",
-        "type": "boolean | string",
-        "required": false,
-        "description": ""
-      }
-    ]
-  }
+  "description": "List organizations (also means 'systems') by paging. If you want to get all organizations, you need to call this tool repeatedly by incrementing the page parameter until the returned pageStatus.is_end is true.",
+  "parameters": [
+    {
+      "name": "detail",
+      "type": "boolean | string",
+      "required": false,
+      "description": ""
+    },
+    {
+      "name": "page",
+      "type": "float | string",
+      "required": false,
+      "description": ""
+    },
+    {
+      "name": "size",
+      "type": "float | string",
+      "required": false,
+      "description": ""
+    },
+    {
+      "name": "withAdmin",
+      "type": "boolean | string",
+      "required": false,
+      "description": ""
+    }
+  ],
+  "name": "LIST_ORGANIZATIONS"
 }

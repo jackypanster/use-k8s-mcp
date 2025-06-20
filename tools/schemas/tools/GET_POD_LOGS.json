@@ -1,50 +1,45 @@
 {
-  "tool_name": "GET_POD_LOGS",
-  "extraction_timestamp": null,
-  "data_integrity_principle": null,
-  "schema": {
-    "name": "GET_POD_LOGS",
-    "description": "Get logs from a Pod",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "cluster": {
-          "type": "string",
-          "description": "Cluster name"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the Pod"
-        },
-        "container": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "previous": {
-          "type": [
-            "boolean",
-            "string"
-          ]
-        },
-        "tailLines": {
-          "type": [
-            "number",
-            "string"
-          ]
-        },
-        "timestamps": {
-          "type": [
-            "boolean",
-            "string"
-          ]
-        }
+  "name": "GET_POD_LOGS",
+  "description": "Get logs from a Pod",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "cluster": {
+        "type": "string",
+        "description": "Cluster name"
       },
-      "required": [
-        "cluster",
-        "name"
-      ]
-    }
+      "name": {
+        "type": "string",
+        "description": "Name of the Pod"
+      },
+      "container": {
+        "type": "string"
+      },
+      "namespace": {
+        "type": "string"
+      },
+      "previous": {
+        "type": [
+          "boolean",
+          "string"
+        ]
+      },
+      "tailLines": {
+        "type": [
+          "number",
+          "string"
+        ]
+      },
+      "timestamps": {
+        "type": [
+          "boolean",
+          "string"
+        ]
+      }
+    },
+    "required": [
+      "cluster",
+      "name"
+    ]
   }
 }
